@@ -691,6 +691,50 @@ button, input, select, textarea { font-family: inherit; }
 
 .logout-btn:hover { filter: brightness(0.95); }
 
+.staff-login-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--accent-indigo-border);
+  background: var(--accent-indigo-soft);
+  color: var(--accent-indigo);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.staff-login-btn:hover {
+  background: var(--accent-indigo);
+  color: #ffffff;
+}
+
+.top-login-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-indigo-border);
+  background: var(--accent-indigo-soft);
+  color: var(--accent-indigo);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.16s ease;
+}
+
+.top-login-pill:hover {
+  background: var(--accent-indigo);
+  color: #ffffff;
+}
+
 .sidebar-backdrop {
   position: fixed;
   inset: 0;

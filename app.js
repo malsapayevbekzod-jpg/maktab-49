@@ -348,6 +348,11 @@
         saveLocalStore(store);
         throw new Error(`Login yoki parol noto'g'ri. Qolgan urinishlar soni: ${rem}.`);
       }
+      if (user.role !== "admin" && user.role !== "director") {
+        addAudit(store, "LOGIN_DENIED", user.username, "Faqat admin va direktor kirishi mumkin.", "warning");
+        saveLocalStore(store);
+        throw new Error("Tizimga kirish faqat Tizim administratori va Maktab direktori uchun! Qolgan foydalanuvchilar saytni logindan o'tmasdan kuzatishlari mumkin.");
+      }
       clearStaticFailure(username);
       const pubUser = { id: user.id, username: user.username, full_name: user.full_name, role: user.role, position: user.position };
       const csrf = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
@@ -358,15 +363,7 @@
     }
 
     const sess = getStaticSession();
-    if (!sess) throw new Error("Tizimga kirish talab qilinadi.");
-    const isManager = sess.user.role === "admin" || sess.user.role === "director";
-
-    if (url === "/api/auth/logout" && method === "POST") {
-      addAudit(store, "LOGOUT", sess.user.username, "Foydalanuvchi tizimdan chiqdi.", "info");
-      saveLocalStore(store);
-      sessionStorage.removeItem(SESSION_KEY);
-      return { ok: true };
-    }
+    const isManager = Boolean(sess && (sess.user.role === "admin" || sess.user.role === "director"));
 
     if (url === "/api/dashboard" && method === "GET") {
       return {
@@ -380,13 +377,9 @@
       };
     }
 
-    if (url === "/api/appeals" && method === "GET") {
-      if (!isManager) throw new Error("Ruxsat yo'q.");
-      return { appeals: store.appeals };
-    }
-
     if (url === "/api/appeals" && method === "POST") {
       if (!body.sender_name || !body.phone || !body.message) throw new Error("Barcha majburiy maydonlarni to'ldiring.");
+      const actor = sess ? sess.user.username : "mehmon";
       store.appeals.unshift({
         id: Date.now(),
         sender_name: body.sender_name,
@@ -394,12 +387,37 @@
         topic: body.topic || "Umumiy murojaat",
         message: body.message,
         status: "Yangi",
-        created_by: sess.user.username,
+        created_by: actor,
         created_at: Math.floor(Date.now() / 1000),
       });
-      addAudit(store, "APPEAL_SUBMIT", sess.user.username, `Yangi murojaat: ${body.topic || "Umumiy"}`, "info");
+      addAudit(store, "APPEAL_SUBMIT", actor, `Yangi murojaat: ${body.topic || "Umumiy"}`, "info");
       saveLocalStore(store);
       return { ok: true, message: "Murojaatingiz xavfsiz qabul qilindi!" };
+    }
+
+    if (!sess || !isManager) throw new Error("Bu amal faqat Tizim administratori va Maktab direktori uchun.");
+
+    if (url === "/api/auth/logout" && method === "POST") {
+      addAudit(store, "LOGOUT", sess.user.username, "Foydalanuvchi tizimdan chiqdi.", "info");
+      saveLocalStore(store);
+      sessionStorage.removeItem(SESSION_KEY);
+      return { ok: true };
+    }
+
+    if (url === "/api/school" && method === "PUT") {
+      const allowed = ["total_students", "total_teachers", "deputy_directors", "phone_1", "phone_2"];
+      for (const k of allowed) {
+        if (body[k] !== undefined && String(body[k]).trim() !== "") {
+          store.school[k] = String(body[k]).trim();
+        }
+      }
+      addAudit(store, "SCHOOL_INFO_UPDATE", sess.user.username, "Maktab ko'rsatkichlari yangilandi.", "info");
+      saveLocalStore(store);
+      return { ok: true, school: store.school };
+    }
+
+    if (url === "/api/appeals" && method === "GET") {
+      return { appeals: store.appeals };
     }
 
     if (url.startsWith("/api/appeals/") && method === "PUT") {
@@ -708,29 +726,53 @@
   async function checkSession() {
     try {
       const res = await apiFetch("/api/auth/me");
-      if (res.authenticated) {
+      if (res.authenticated && (res.user.role === "admin" || res.user.role === "director")) {
         state.user = res.user;
         state.csrfToken = res.csrf_token;
-        await enterApp();
       } else {
-        showLogin();
+        state.user = null;
+        state.csrfToken = "";
       }
     } catch {
-      showLogin();
+      state.user = null;
+      state.csrfToken = "";
     }
+    await enterApp();
   }
 
-  function showLogin() {
-    state.user = null;
-    state.csrfToken = "";
-    document.querySelectorAll("img[data-auth-src]").forEach((img) => img.removeAttribute("src"));
-    document.querySelectorAll("#videos-grid video").forEach((v) => v.pause());
-    const vg = document.getElementById("videos-grid");
-    if (vg) vg.innerHTML = "";
-    appView.classList.add("hidden");
-    loginView.classList.remove("hidden");
+  function openLoginScreen() {
+    closeMobileSidebar();
+    loginError.classList.add("hidden");
     loginPassword.value = "";
     syncHints();
+    appView.classList.add("hidden");
+    loginView.classList.remove("hidden");
+    loginUsername.focus();
+  }
+
+  function closeLoginScreen() {
+    loginView.classList.add("hidden");
+    appView.classList.remove("hidden");
+  }
+
+  document.querySelectorAll("[data-open-login]").forEach((btn) => {
+    btn.addEventListener("click", openLoginScreen);
+  });
+  document.getElementById("back-to-site-btn")?.addEventListener("click", closeLoginScreen);
+
+  function syncRoleVisibility() {
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
+    const isSuperAdmin = Boolean(state.user && state.user.role === "admin");
+
+    document.querySelectorAll(".admin-only").forEach((el) => el.classList.toggle("hidden", !isManager));
+    document.querySelectorAll(".superadmin-only").forEach((el) => el.classList.toggle("hidden", !isSuperAdmin));
+    document.querySelectorAll(".guest-only").forEach((el) => el.classList.toggle("hidden", isManager));
+
+    if (isManager) {
+      document.getElementById("user-avatar").textContent = getInitials(state.user.full_name);
+      document.getElementById("user-fullname").textContent = state.user.full_name;
+      document.getElementById("user-role-label").textContent = ROLE_LABELS[state.user.role] || state.user.role;
+    }
   }
 
   async function enterApp() {
@@ -740,17 +782,13 @@
       img.src = img.dataset.authSrc;
     });
 
-    document.getElementById("user-avatar").textContent = getInitials(state.user.full_name);
-    document.getElementById("user-fullname").textContent = state.user.full_name;
-    document.getElementById("user-role-label").textContent = ROLE_LABELS[state.user.role] || state.user.role;
-
-    const isManager = state.user.role === "admin" || state.user.role === "director";
-    const isSuperAdmin = state.user.role === "admin";
-    document.querySelectorAll(".admin-only").forEach((el) => el.classList.toggle("hidden", !isManager));
-    document.querySelectorAll(".superadmin-only").forEach((el) => el.classList.toggle("hidden", !isSuperAdmin));
-
+    syncRoleVisibility();
     await loadDashboardData();
-    switchPage("home");
+    if (state.currentPage === "security" && !state.user) {
+      switchPage("home");
+    } else {
+      switchPage(state.currentPage || "home");
+    }
   }
 
   loginForm.addEventListener("submit", async (e) => {
@@ -783,8 +821,14 @@
 
   document.getElementById("logout-btn").addEventListener("click", async () => {
     try { await apiFetch("/api/auth/logout", { method: "POST", body: JSON.stringify({}) }); } catch { /* ignore */ }
+    state.user = null;
+    state.csrfToken = "";
+    state.appeals = [];
+    state.auditLogs = [];
     closeMobileSidebar();
-    showLogin();
+    syncRoleVisibility();
+    await loadDashboardData();
+    switchPage("home");
   });
 
   async function loadDashboardData() {
@@ -805,11 +849,44 @@
     renderVideos();
     renderLocation();
     renderAppeals();
+    fillSchoolEditForm();
 
-    if (state.user.role === "admin" || state.user.role === "director") {
+    if (state.user && (state.user.role === "admin" || state.user.role === "director")) {
       loadSecurityAudit();
     }
   }
+
+  function fillSchoolEditForm() {
+    const f1 = document.getElementById("si-students");
+    if (!f1) return;
+    f1.value = state.school.total_students || "473";
+    document.getElementById("si-teachers").value = state.school.total_teachers || "43";
+    document.getElementById("si-deputies").value = state.school.deputy_directors || "2";
+    document.getElementById("si-phone1").value = state.school.phone_1 || "+998 88 654 30 06";
+  }
+
+  document.getElementById("school-info-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fb = document.getElementById("school-info-feedback");
+    fb.className = "alert-box hidden";
+    const payload = {
+      total_students: document.getElementById("si-students").value.trim(),
+      total_teachers: document.getElementById("si-teachers").value.trim(),
+      deputy_directors: document.getElementById("si-deputies").value.trim(),
+      phone_1: document.getElementById("si-phone1").value.trim(),
+    };
+    try {
+      const res = await apiFetch("/api/school", { method: "PUT", body: JSON.stringify(payload) });
+      state.school = res.school || state.school;
+      renderHome();
+      renderTeachers();
+      fb.textContent = "Maktab ko'rsatkichlari muvaffaqiyatli saqlandi!";
+      fb.className = "alert-box alert-success";
+    } catch (err) {
+      fb.textContent = err.message;
+      fb.className = "alert-box alert-error";
+    }
+  });
 
   async function loadSecurityAudit() {
     try {
@@ -1268,7 +1345,7 @@
       fb.textContent = res.message;
       fb.className = "alert-box alert-success";
       e.target.reset();
-      if (state.user.role === "admin" || state.user.role === "director") {
+      if (state.user && (state.user.role === "admin" || state.user.role === "director")) {
         const listRes = await apiFetch("/api/appeals");
         state.appeals = listRes.appeals || [];
         renderAppeals();
