@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Maktab 49 — Ta'lim Platformasi | Ellikqal'a, Soribiy OFY</title>
+  <link rel="icon" type="image/svg+xml" href="logo-49.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ==================== 1. LOGIN EKRANI (eMaktab uslubida) ==================== -->
+  <div id="login-view" class="login-page">
+    <header class="login-topbar">
+      <div class="login-topbar-inner">
+        <div class="brand-lockup">
+          <div class="brand-emblem">
+            <img src="logo-49.svg" alt="49-sonli maktab rasmiy logotipi" />
+          </div>
+          <div class="brand-titles">
+            <span class="brand-name">maktab <strong>49</strong></span>
+            <span class="brand-sub">Soribiy OFY • Ellikqal'a tumani</span>
+          </div>
+        </div>
+        <div class="login-topbar-meta">
+          <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Tungi yoki kunduzgi rejimni almashtirish">
+            <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg class="icon-sun hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <span class="theme-toggle-label">Tungi rejim</span>
+          </button>
+          <span class="secure-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Yuqori xavfsizlik
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main class="login-main">
+      <section class="login-card" aria-labelledby="login-heading">
+        <div class="login-card-header">
+          <div class="login-header-brand">
+            <img src="logo-49.svg" alt="49-maktab gerbi" class="login-header-crest" />
+            <div>
+              <h1 id="login-heading">Kirish — Maktab 49</h1>
+              <p class="login-card-subtitle">49-sonli umumiy o'rta ta'lim maktabi ta'lim platformasi</p>
+            </div>
+          </div>
+          <button type="button" id="open-help-btn" class="header-help-link">
+            Tizimda ro'yxatdan o'tmaganmisiz?
+          </button>
+        </div>
+
+        <form id="login-form" class="login-card-body" autocomplete="off" novalidate>
+          <div id="login-error" class="alert-box alert-error hidden" role="alert"></div>
+
+          <div class="form-row-emaktab">
+            <div class="input-group">
+              <label for="login-username">Login</label>
+              <div class="input-wrap">
+                <input
+                  id="login-username"
+                  name="username"
+                  type="text"
+                  placeholder="Loginingizni kiriting"
+                  autocomplete="username"
+                  required
+                />
+              </div>
+            </div>
+            <div class="hint-bubble" id="hint-username">Loginingizni kiriting.</div>
+          </div>
+
+          <div class="form-row-emaktab">
+            <div class="input-group">
+              <label for="login-password">Parol</label>
+              <div class="input-wrap">
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  placeholder="Parolingizni kiriting"
+                  autocomplete="current-password"
+                  required
+                />
+                <button type="button" id="toggle-pw-btn" class="pw-eye-btn" aria-label="Parolni ko'rsatish">
+                  <svg id="eye-icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg id="eye-icon-closed" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="hint-bubble" id="hint-password">Parolni kiriting.</div>
+          </div>
+
+          <div class="login-actions">
+            <button type="submit" id="login-submit-btn" class="btn-emaktab-green">
+              <span>Tizimga kiring</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="login-card-footer">
+          <div class="footer-help">
+            <span class="help-circle">?</span>
+            <span>Login yoki parolni unutdingizmi?</span>
+            <button type="button" id="open-help-btn-2" class="text-link-btn">Administratorga murojaat</button>
+          </div>
+          <div class="security-badges">
+            <span>PBKDF2-SHA256</span>
+            <span>•</span>
+            <span>HttpOnly Sessiya</span>
+            <span>•</span>
+            <span>Brute-Force Himoya</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="login-school-caption">
+        Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY • 49-sonli umumiy o'rta ta'lim maktabi (1988-yildan beri)
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== 2. ASOSIY PLATFORMA (CHAP PANEL NAVIGATSIYA) ==================== -->
+  <div id="app-view" class="app-shell hidden">
+
+    <!-- Mobil kengaytirilganda orqa fon qorayishi -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop hidden"></div>
+
+    <!-- CHAP TARAF PANELI (Barcha sahifalar shu yerda!) -->
+    <aside id="sidebar" class="sidebar" aria-label="Asosiy sahifalar menyusi">
+      <div class="sidebar-header">
+        <button type="button" id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Menyuni kengaytirish">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="sidebar-brand">
+          <img src="logo-49.svg" alt="49-maktab logotipi" class="sidebar-logo-img" />
+          <div class="sidebar-brand-text">
+            <strong>Maktab 49</strong>
+            <span>Ta'lim platformasi</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <button type="button" class="nav-item active" data-page="home">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span class="nav-label">Bosh sahifa</span>
+          <span class="nav-mini">Asosiy</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="schedule">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/></svg>
+          </span>
+          <span class="nav-label">Dars jadvali</span>
+          <span class="nav-mini">Jadval</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="leadership">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 .8-4.5 4.2 1.1 6L12 16l-5.6 3 1.1-6L3 8.8 9 8z"/></svg>
+          </span>
+          <span class="nav-label">Rahbariyat</span>
+          <span class="nav-mini">Rahbar</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="teachers">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="nav-label">O'qituvchilar</span>
+          <span class="nav-mini">Ustoz</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="students">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </span>
+          <span class="nav-label">O'quvchilar</span>
+          <span class="nav-mini">O'quvchi</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="gallery">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </span>
+          <span class="nav-label">Sinf xonalari</span>
+          <span class="nav-mini">Xonalar</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="videos">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><polygon points="10 9 16 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <span class="nav-label">Videolar</span>
+          <span class="nav-mini">Video</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="location">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <span class="nav-label">Lokatsiya</span>
+          <span class="nav-mini">Xarita</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="contact">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <span class="nav-label">Murojaatlar</span>
+          <span class="nav-mini">Aloqa</span>
+        </button>
+
+        <button type="button" class="nav-item" data-page="security">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </span>
+          <span class="nav-label">Xavfsizlik</span>
+          <span class="nav-mini">Xavfsiz</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-box">
+          <div id="user-avatar" class="user-avatar">MB</div>
+          <div class="user-info">
+            <strong id="user-fullname">Foydalanuvchi</strong>
+            <span id="user-role-label">Rol</span>
+          </div>
+        </div>
+        <button type="button" id="logout-btn" class="logout-btn" title="Tizimdan chiqish">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="logout-text">Chiqish</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ASOSIY KONTENT QISMI -->
+    <main class="main-content" id="main-content">
+      <div class="content-container">
+
+        <!-- Sahifa sarlavha chizig'i + Tungi/Kunduzgi rejim almashtirgich -->
+        <div class="page-status-bar">
+          <div>
+            <div class="breadcrumb-small">Qoraqalpog'iston Respublikasi • Ellikqal'a tumani • Soribiy OFY</div>
+            <h2 id="current-page-title" class="page-main-title">Bosh sahifa</h2>
+          </div>
+          <div class="status-pills">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Tungi yoki kunduzgi rejimni almashtirish">
+              <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <svg class="icon-sun hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              <span class="theme-toggle-label">Tungi rejim</span>
+            </button>
+            <span class="pill-live">
+              <span class="dot-green"></span>
+              Himoyalangan ulanish
+            </span>
+          </div>
+        </div>
+
+        <!-- ========== SAHIFA 1: BOSH SAHIFA ========== -->
+        <section id="page-home" class="page-section active">
+          <!-- Hero karta: Maktab old tomon ko'rinishi -->
+          <div class="hero-card">
+            <div class="hero-media">
+              <img data-auth-src="entrance.jpg" alt="49-sonli maktab old tomon ko'rinishi" loading="eager" />
+              <div class="hero-overlay">
+                <span class="hero-badge">Tashkil etilgan: 01.09.1988</span>
+                <h1>49-sonli umumiy o'rta ta'lim maktabi</h1>
+                <p>Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY</p>
+              </div>
+            </div>
+            <div class="hero-bottom-strip">
+              <div class="hero-strip-item">
+                <span class="strip-label">Direktor</span>
+                <strong>Alimov Elyor Kuriyaz o'g'li</strong>
+              </div>
+              <div class="hero-strip-item">
+                <span class="strip-label">Tizim administratori</span>
+                <strong>Matsapayev Bekzod Dilshod o'g'li</strong>
+              </div>
+              <div class="hero-strip-item">
+                <span class="strip-label">Murojaat telefonlari</span>
+                <strong><a href="tel:+998886543006">88 654 30 06</a> • <a href="tel:+998773128485">77 312 84 85</a></strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 ta asosiy ko'rsatkich -->
+          <div class="stats-grid">
+            <article class="stat-card stat-blue">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              </div>
+              <div>
+                <div class="stat-value" id="stat-students">473</div>
+                <div class="stat-label">Jami o'quvchilar</div>
+              </div>
+            </article>
+
+            <article class="stat-card stat-green">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+              </div>
+              <div>
+                <div class="stat-value" id="stat-teachers">43</div>
+                <div class="stat-label">Jami o'qituvchilar</div>
+              </div>
+            </article>
+
+            <article class="stat-card stat-indigo">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 .8-4.5 4.2 1.1 6L12 16l-5.6 3 1.1-6L3 8.8 9 8z"/></svg>
+              </div>
+              <div>
+                <div class="stat-value" id="stat-deputies">2</div>
+                <div class="stat-label">Direktor o'rinbosari</div>
+              </div>
+            </article>
+
+            <article class="stat-card stat-amber">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div>
+                <div class="stat-value" id="stat-founded">1988</div>
+                <div class="stat-label">01/09/1988 dan beri</div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Maktab pasporti & Tezkor fotolar -->
+          <div class="two-col-grid">
+            <article class="card">
+              <div class="card-head">
+                <h3>Maktab pasporti va ma'lumotlari</h3>
+                <button type="button" class="btn-outline-sm" data-goto="schedule">10-A dars jadvali</button>
+              </div>
+              <dl class="passport-list">
+                <div class="passport-row">
+                  <dt>Muassasa nomi</dt>
+                  <dd>49-sonli umumiy o'rta ta'lim maktabi</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Hududiy manzil</dt>
+                  <dd>Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Tashkil etilgan sana</dt>
+                  <dd>01/09/1988 (1988-yil 1-sentabr)</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Maktab direktori</dt>
+                  <dd>Alimov Elyor Kuriyaz o'g'li</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Direktor o'rinbosarlari</dt>
+                  <dd>Matniyazov Muzaffar Ayitovich, Abduraimov G'ayrat Tajiboy o'g'li</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Boshqaruv xodimi</dt>
+                  <dd>Atadjanov Ikram Xakimovich</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Tizim administratori</dt>
+                  <dd>Matsapayev Bekzod Dilshod o'g'li</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Maktab binosi va sinf xonalari</h3>
+                <button type="button" class="btn-outline-sm" data-goto="gallery">Barcha rasmlar</button>
+              </div>
+              <div class="mini-gallery-grid" id="home-mini-gallery"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========== SAHIFA 2: DARS JADVALI (KUNLIK VA HAFTALIK — 10-A SINF) ========== -->
+        <section id="page-schedule" class="page-section">
+          <div class="schedule-topbar">
+            <div class="schedule-tabs" role="tablist" aria-label="Dars jadvali ko'rinishi">
+              <button type="button" class="sched-tab active" data-sched-view="daily" role="tab" aria-selected="true">
+                Kunlik dars jadvali
+              </button>
+              <button type="button" class="sched-tab" data-sched-view="weekly" role="tab" aria-selected="false">
+                Haftalik dars jadvali
+              </button>
+            </div>
+            <div class="schedule-meta-right">
+              <span class="class-pill">10-A sinf</span>
+              <span class="sched-hint-note admin-only hidden">Tahrirlash uchun fan ustiga bosing</span>
+            </div>
+          </div>
+
+          <!-- 1) KUNLIK DARS JADVALI -->
+          <div id="schedule-daily-panel" class="sched-panel active">
+            <!-- 7 kunlik tanlov kartalari (Dush ... Yak) -->
+            <div id="daily-day-strip" class="day-strip" role="tablist" aria-label="Hafta kunlari"></div>
+
+            <!-- Jadval kartasi (rasmdagidek toza gorizontal ko'rinish, telefonda vertikal) -->
+            <div class="daily-board-card">
+              <div id="daily-board-caption" class="daily-board-caption">
+                10-A sinf — kunlik dars jadvali
+              </div>
+              <div id="daily-board-body" class="daily-board-body"></div>
+            </div>
+
+            <div class="schedule-footnote">
+              Maktab 49 o'quv rejasi asosida 10-A sinf uchun kunlik dars vaqtlari va fanlar jadvali.
+            </div>
+          </div>
+
+          <!-- 2) HAFTALIK DARS JADVALI -->
+          <div id="schedule-weekly-panel" class="sched-panel hidden">
+            <div class="weekly-board-card">
+              <div class="daily-board-caption">
+                10-A sinf — to'liq haftalik dars jadvali (Dushanba – Shanba)
+              </div>
+              <div id="weekly-board-desktop" class="weekly-table-wrap"></div>
+              <div id="weekly-board-mobile" class="weekly-mobile-cards"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== SAHIFA 3: RAHBARIYAT ========== -->
+        <section id="page-leadership" class="page-section">
+          <div class="section-intro">
+            <h3>Maktab rahbariyati va ma'muriy tarkib</h3>
+            <p>49-sonli umumiy o'rta ta'lim maktabi boshqaruv jamoasi va tizim administratori.</p>
+          </div>
+          <div id="leadership-grid" class="leadership-grid"></div>
+        </section>
+
+        <!-- ========== SAHIFA 4: O'QITUVCHILAR ========== -->
+        <section id="page-teachers" class="page-section">
+          <div class="toolbar-card">
+            <div class="toolbar-left">
+              <div class="search-input-wrap">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="search" id="teacher-search" placeholder="O'qituvchi F.I.Sh. yoki fan bo'yicha qidirish..." />
+              </div>
+              <span class="count-badge" id="teachers-count-badge">Jami: 43 nafar • Kiritilgan: 8 nafar</span>
+            </div>
+            <button type="button" id="open-add-teacher-btn" class="btn-primary admin-only hidden">
+              + O'qituvchi qo'shish
+            </button>
+          </div>
+
+          <div class="card table-card">
+            <div class="teachers-list" id="teachers-list"></div>
+          </div>
+        </section>
+
+        <!-- ========== SAHIFA 5: O'QUVCHILAR ========== -->
+        <section id="page-students" class="page-section">
+          <div class="stats-grid stats-grid-3">
+            <article class="stat-card stat-blue">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              </div>
+              <div>
+                <div class="stat-value" id="students-page-total">473</div>
+                <div class="stat-label">Jami ta'lim oluvchi o'quvchilar</div>
+              </div>
+            </article>
+            <article class="stat-card stat-green">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+              <div>
+                <div class="stat-value">1 – 11</div>
+                <div class="stat-label">Sinflar qamrovi</div>
+              </div>
+            </article>
+            <article class="stat-card stat-indigo">
+              <div class="stat-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div>
+                <div class="stat-value">11:1</div>
+                <div class="stat-label">O'quvchi / O'qituvchi nisbati</div>
+              </div>
+            </article>
+          </div>
+
+          <div class="two-col-grid">
+            <article class="card">
+              <div class="card-head">
+                <h3>Ta'lim bosqichlari va imkoniyatlar</h3>
+              </div>
+              <div class="progress-stack">
+                <div class="progress-item">
+                  <div class="progress-head">
+                    <span>Boshlang'ich ta'lim (1–4-sinflar)</span>
+                    <strong>Faol</strong>
+                  </div>
+                  <div class="progress-track"><div class="progress-fill fill-blue" style="width: 38%"></div></div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-head">
+                    <span>Tayanch o'rta ta'lim (5–9-sinflar)</span>
+                    <strong>Faol</strong>
+                  </div>
+                  <div class="progress-track"><div class="progress-fill fill-green" style="width: 44%"></div></div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-head">
+                    <span>Yuqori sinflar (10–11-sinflar)</span>
+                    <strong>Faol</strong>
+                  </div>
+                  <div class="progress-track"><div class="progress-fill fill-indigo" style="width: 18%"></div></div>
+                </div>
+              </div>
+              <p class="muted-note">
+                49-sonli maktabda jami <strong>473 nafar</strong> o'quvchi zamonaviy sinf xonalari, axborot-kutubxona markazi va malakali 43 nafar pedagoglar rahbarligida bilim olmoqda.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>O'quv muhiti va kutubxona</h3>
+              </div>
+              <div class="feature-photo-pair">
+                <figure class="feature-photo" data-lightbox="classroom.jpg" data-caption="Zamonaviy o'quv sinf xonasi">
+                  <img data-auth-src="classroom.jpg" alt="Sinf xonasi" loading="lazy" />
+                  <figcaption>Zamonaviy sinf xonasi</figcaption>
+                </figure>
+                <figure class="feature-photo" data-lightbox="library.jpg" data-caption="Maktab axborot-kutubxona markazi">
+                  <img data-auth-src="library.jpg" alt="Kutubxona" loading="lazy" />
+                  <figcaption>Axborot-kutubxona markazi</figcaption>
+                </figure>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========== SAHIFA 6: SINF XONALARI VA GALEREYA ========== -->
+        <section id="page-gallery" class="page-section">
+          <div class="filter-bar" id="gallery-filters">
+            <button type="button" class="filter-chip active" data-cat="all">Barchasi</button>
+            <button type="button" class="filter-chip" data-cat="Old ko'rinish">Old ko'rinish</button>
+            <button type="button" class="filter-chip" data-cat="Sinf xonalari">Sinf xonalari</button>
+            <button type="button" class="filter-chip" data-cat="Kutubxona">Kutubxona</button>
+            <button type="button" class="filter-chip" data-cat="Ichki ko'rinish">Ichki ko'rinish</button>
+          </div>
+          <div id="gallery-grid" class="gallery-grid"></div>
+        </section>
+
+        <!-- ========== SAHIFA 6B: VIDEOLAR ========== -->
+        <section id="page-videos" class="page-section">
+          <div class="section-intro">
+            <h3>Maktab videolari</h3>
+            <p>49-sonli umumiy o'rta ta'lim maktabi o'quvchilari va maktab hayotidan videolavhalar.</p>
+          </div>
+          <div id="videos-grid" class="videos-grid"></div>
+        </section>
+
+        <!-- ========== SAHIFA 7: MAKTAB LOKATSIYASI ========== -->
+        <section id="page-location" class="page-section">
+          <div class="two-col-grid location-layout">
+            <article class="card location-map-card">
+              <div class="card-head">
+                <h3>49-Maktab sun'iy yo'ldosh xaritasi</h3>
+                <span class="count-badge">Barhayot mahallasi • Soribiy OFY</span>
+              </div>
+              <div class="map-image-frame" data-lightbox="location-map.jpg" data-caption="49-sonli maktab joylashuvi — Barhayot mahallasi, Soribiy OFY, Ellikqal'a tumani">
+                <img data-auth-src="location-map.jpg" alt="49-Maktab sun'iy yo'ldosh xaritasi" loading="lazy" />
+                <div class="map-zoom-badge">Kattalashtirib ko'rish</div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Joylashuv va navigator ma'lumotlari</h3>
+              </div>
+              <dl class="passport-list">
+                <div class="passport-row">
+                  <dt>Muassasa</dt>
+                  <dd>49-sonli umumiy o'rta ta'lim maktabi</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Hudud</dt>
+                  <dd>Qoraqalpog'iston Respublikasi, Ellikqal'a tumani</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>OFY / Mahalla</dt>
+                  <dd>Soribiy OFY, Barhayot mahallasi</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>GPS koordinata</dt>
+                  <dd id="coords-text">41.572770, 60.890981</dd>
+                </div>
+                <div class="passport-row">
+                  <dt>Aloqa telefonlari</dt>
+                  <dd><a href="tel:+998886543006">+998 88 654 30 06</a>, <a href="tel:+998773128485">+998 77 312 84 85</a></dd>
+                </div>
+              </dl>
+
+              <div class="map-action-buttons">
+                <a
+                  id="google-maps-link"
+                  class="btn-primary map-ext-btn"
+                  href="https://www.google.com/maps/search/?api=1&query=41.572770,60.890981"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Google Maps'da ochish →
+                </a>
+                <a
+                  id="yandex-maps-link"
+                  class="btn-emaktab-green map-ext-btn"
+                  href="https://yandex.uz/maps/?pt=60.890981,41.572770&z=17&l=sat,skl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Yandex Maps'da ochish →
+                </a>
+                <button type="button" id="copy-coords-btn" class="btn-outline-sm map-copy-btn">
+                  Koordinatani nusxalash (41.572770, 60.890981)
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ========== SAHIFA 8: MUROJAATLAR VA ALOQA ========== -->
+        <section id="page-contact" class="page-section">
+          <div class="two-col-grid">
+            <article class="card">
+              <div class="card-head">
+                <h3>Rasmiy aloqa va murojaatlar</h3>
+                <button type="button" class="btn-outline-sm" data-goto="location">Xaritada ko'rish</button>
+              </div>
+              <div class="contact-blocks">
+                <div class="contact-item">
+                  <span class="contact-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </span>
+                  <div>
+                    <div class="contact-label">Maktab manzili</div>
+                    <strong>Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY (Barhayot mahallasi), 49-sonli maktab</strong>
+                  </div>
+                </div>
+
+                <div class="contact-item">
+                  <span class="contact-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </span>
+                  <div>
+                    <div class="contact-label">Tizim administratori</div>
+                    <strong>Matsapayev Bekzod Dilshod o'g'li</strong>
+                  </div>
+                </div>
+
+                <div class="phone-cards">
+                  <a class="phone-call-card" href="tel:+998886543006">
+                    <span class="phone-tag">Murojaat telefoni 1</span>
+                    <strong>+998 88 654 30 06</strong>
+                    <span class="call-now">Qo'ng'iroq qilish →</span>
+                  </a>
+                  <a class="phone-call-card" href="tel:+998773128485">
+                    <span class="phone-tag">Murojaat telefoni 2</span>
+                    <strong>+998 77 312 84 85</strong>
+                    <span class="call-now">Qo'ng'iroq qilish →</span>
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head">
+                <h3>Elektron murojaat yuborish</h3>
+              </div>
+              <form id="appeal-form" class="stacked-form">
+                <div id="appeal-feedback" class="alert-box hidden"></div>
+                <div class="field">
+                  <label for="appeal-name">Ism-familiyangiz</label>
+                  <input id="appeal-name" type="text" required placeholder="Masalan: Karimov Sardor" />
+                </div>
+                <div class="field">
+                  <label for="appeal-phone">Telefon raqamingiz</label>
+                  <input id="appeal-phone" type="tel" required placeholder="+998 90 123 45 67" />
+                </div>
+                <div class="field">
+                  <label for="appeal-topic">Murojaat mavzusi</label>
+                  <input id="appeal-topic" type="text" placeholder="Ta'lim jarayoni, taklif yoki savol" />
+                </div>
+                <div class="field">
+                  <label for="appeal-message">Murojaat matni</label>
+                  <textarea id="appeal-message" rows="4" required placeholder="Murojaatingizni batafsil yozing..."></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Murojaatni xavfsiz yuborish</button>
+              </form>
+            </article>
+          </div>
+
+          <!-- Rahbariyat/Admin uchun kelgan murojaatlar -->
+          <article class="card admin-only hidden" id="appeals-admin-card" style="margin-top: 20px;">
+            <div class="card-head">
+              <h3>Kelib tushgan murojaatlar ro'yxati</h3>
+            </div>
+            <div id="appeals-list" class="appeals-list"></div>
+          </article>
+        </section>
+
+        <!-- ========== SAHIFA 9: XAVFSIZLIK VA SOZLAMALAR ========== -->
+        <section id="page-security" class="page-section">
+          <div class="security-overview-banner">
+            <div class="sec-shield">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div>
+              <h3>Yuqori darajadagi axborot xavfsizligi faol</h3>
+              <p>Parollar PBKDF2-HMAC-SHA256 (260 000 iteratsiya + 256-bit tasodifiy tuz) bilan shifrlangan. Sessiyalar HttpOnly + SameSite=Strict cookie va CSRF token bilan himoyalangan. Barcha rasmlar va ma'lumotlar autentifikatsiyasiz ochilmaydi.</p>
+            </div>
+          </div>
+
+          <div class="two-col-grid">
+            <!-- Parolni o'zgartirish (hamma uchun) -->
+            <article class="card">
+              <div class="card-head">
+                <h3>Shaxsiy parolni o'zgartirish</h3>
+              </div>
+              <form id="change-pw-form" class="stacked-form">
+                <div id="pw-feedback" class="alert-box hidden"></div>
+                <div class="field">
+                  <label for="cur-pw">Joriy parol</label>
+                  <input id="cur-pw" type="password" required />
+                </div>
+                <div class="field">
+                  <label for="new-pw">Yangi parol (kamida 8 belgi, katta/kichik harf va raqam)</label>
+                  <input id="new-pw" type="password" required minlength="8" />
+                </div>
+                <div class="field">
+                  <label for="confirm-pw">Yangi parolni tasdiqlang</label>
+                  <input id="confirm-pw" type="password" required minlength="8" />
+                </div>
+                <button type="submit" class="btn-primary">Parolni yangilash</button>
+              </form>
+            </article>
+
+            <!-- Yangi foydalanuvchi yaratish (faqat Tizim administratori) -->
+            <article class="card superadmin-only hidden" id="create-user-card">
+              <div class="card-head">
+                <h3>Yangi tizim foydalanuvchisi yaratish</h3>
+              </div>
+              <form id="create-user-form" class="stacked-form">
+                <div id="user-create-feedback" class="alert-box hidden"></div>
+                <div class="field">
+                  <label for="nu-fullname">To'liq ism-familiya</label>
+                  <input id="nu-fullname" type="text" required placeholder="Masalan: Matniyazov Muzaffar Ayitovich" />
+                </div>
+                <div class="field-row-2">
+                  <div class="field">
+                    <label for="nu-username">Login</label>
+                    <input id="nu-username" type="text" required placeholder="m.matniyazov" />
+                  </div>
+                  <div class="field">
+                    <label for="nu-role">Roli</label>
+                    <select id="nu-role">
+                      <option value="teacher">O'qituvchi</option>
+                      <option value="director">Direktor / O'rinbosar</option>
+                      <option value="admin">Tizim administratori</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="nu-position">Lavozimi</label>
+                  <input id="nu-position" type="text" placeholder="O'qituvchi / Direktor o'rinbosari" />
+                </div>
+                <div class="field">
+                  <label for="nu-password">Boshlang'ich kuchli parol</label>
+                  <input id="nu-password" type="password" required minlength="8" placeholder="Kamida 8 belgi (A-z, 0-9)" />
+                </div>
+                <button type="submit" class="btn-primary">Hisob yaratish</button>
+              </form>
+            </article>
+          </div>
+
+          <!-- Xavfsizlik audit jurnali (Admin va Direktor uchun) -->
+          <article class="card admin-only hidden" id="audit-card" style="margin-top: 20px;">
+            <div class="card-head">
+              <h3>Xavfsizlik va harakatlar jurnali (Audit Log)</h3>
+              <button type="button" id="refresh-audit-btn" class="btn-outline-sm">Yangilash</button>
+            </div>
+            <div id="audit-list" class="audit-list"></div>
+          </article>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== MODALLAR ==================== -->
+
+  <!-- 1. Yordam / Parolni unutish modali -->
+  <div id="help-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <div class="modal-backdrop" data-close-modal="help-modal"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="help-modal-title">Tizimga kirish bo'yicha yordam</h3>
+        <button type="button" class="modal-close" data-close-modal="help-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>
+          <strong>Maktab 49 Ta'lim Platformasi</strong> yuqori xavfsizlik talablariga muvofiq yopiq tizim hisoblanadi.
+          Yangi login/parol olish yoki unutilgan parolni tiklash uchun maktab tizim administratoriga murojaat qiling:
+        </p>
+        <div class="help-admin-box">
+          <div><span>Tizim administratori:</span> <strong>Matsapayev Bekzod Dilshod o'g'li</strong></div>
+          <div><span>Telefon 1:</span> <a href="tel:+998886543006"><strong>+998 88 654 30 06</strong></a></div>
+          <div><span>Telefon 2:</span> <a href="tel:+998773128485"><strong>+998 77 312 84 85</strong></a></div>
+          <div><span>Manzil:</span> Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY, 49-sonli maktab</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" data-close-modal="help-modal">Tushunarli</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. O'qituvchi qo'shish / tahrirlash modali -->
+  <div id="teacher-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="teacher-modal-title">
+    <div class="modal-backdrop" data-close-modal="teacher-modal"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="teacher-modal-title">Yangi o'qituvchi qo'shish</h3>
+        <button type="button" class="modal-close" data-close-modal="teacher-modal">&times;</button>
+      </div>
+      <form id="teacher-form" class="modal-body stacked-form">
+        <input type="hidden" id="tf-id" value="" />
+        <div id="tf-error" class="alert-box alert-error hidden"></div>
+        <div class="field">
+          <label for="tf-fullname">F.I.Sh. (To'liq ism-familiya)</label>
+          <input id="tf-fullname" type="text" required placeholder="Masalan: Allabergenova Nasiba Ismoilovna" />
+        </div>
+        <div class="field">
+          <label for="tf-subject">Mutaxassisligi / Fani</label>
+          <input id="tf-subject" type="text" placeholder="Masalan: Ona tili va adabiyot" value="O'qituvchi" />
+        </div>
+        <div class="field-row-2">
+          <div class="field">
+            <label for="tf-category">Lavozim toifasi</label>
+            <input id="tf-category" type="text" value="Pedagog xodim" />
+          </div>
+          <div class="field">
+            <label for="tf-exp">Ish staji (yil)</label>
+            <input id="tf-exp" type="number" min="0" max="60" value="0" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="tf-phone">Telefon raqami (ixtiyoriy)</label>
+          <input id="tf-phone" type="tel" placeholder="+998 ..." />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline-sm" data-close-modal="teacher-modal">Bekor qilish</button>
+          <button type="submit" class="btn-primary">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Dars jadvali katakchasini tahrirlash modali (Admin/Direktor) -->
+  <div id="schedule-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="sched-modal-title">
+    <div class="modal-backdrop" data-close-modal="schedule-modal"></div>
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="sched-modal-title">Darsni tahrirlash (10-A sinf)</h3>
+        <button type="button" class="modal-close" data-close-modal="schedule-modal">&times;</button>
+      </div>
+      <form id="schedule-edit-form" class="modal-body stacked-form">
+        <input type="hidden" id="sf-class" value="10-A" />
+        <input type="hidden" id="sf-day" value="1" />
+        <input type="hidden" id="sf-lesson" value="1" />
+        <div id="sf-error" class="alert-box alert-error hidden"></div>
+        <div class="field">
+          <label for="sf-time">Dars vaqti</label>
+          <input id="sf-time" type="text" required placeholder="08:30 - 09:15" />
+        </div>
+        <div class="field">
+          <label for="sf-subject">Fan nomi (o'chirish uchun bo'sh qoldiring)</label>
+          <input id="sf-subject" type="text" placeholder="Masalan: Algebra" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline-sm" data-close-modal="schedule-modal">Bekor qilish</button>
+          <button type="submit" class="btn-primary">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. HD Foto Lightbox -->
+  <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Rasmni kattalashtirib ko'rish">
+    <button type="button" id="lb-close" class="lb-btn lb-close" aria-label="Yopish">&times;</button>
+    <button type="button" id="lb-prev" class="lb-btn lb-prev" aria-label="Oldingi rasm">&#10094;</button>
+    <div class="lb-stage">
+      <img id="lb-img" src="" alt="" />
+      <div id="lb-caption" class="lb-caption"></div>
+    </div>
+    <button type="button" id="lb-next" class="lb-btn lb-next" aria-label="Keyingi rasm">&#10095;</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
