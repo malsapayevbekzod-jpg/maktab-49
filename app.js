@@ -1,15 +1,95 @@
 /* ==========================================================================
    Maktab 49 — Ta'lim Platformasi (GitHub Pages + Lokal Server Dual-Mode)
-   PBKDF2-HMAC-SHA256 (260,000 iteratsiya, Web Crypto API), Brute-Force himoya,
-   Kunlik & Haftalik 10-A dars jadvali, Videolar, Lokatsiya, Kunduzgi/Tungi rejim
+   - Barcha mehmonlar parolsiz kuzatadi
+   - Faqat Admin (admin49) va Direktor (direktor49) login bilan kiradi
+   - Parol o'zgartirish FAQAT Adminga ko'rinadi va ishlaydi
+   - Tadbirlar bo'limida saytning o'zidan Rasm va Video yuklash (IndexedDB + Server)
+   - Barcha o'zgarishlar (o'qituvchilar, rahbariyat, dars jadvali, sinf xonalari,
+     tadbirlar, maktab ko'rsatkichlari) saqlanib qoladi!
    ========================================================================== */
 
 (() => {
   "use strict";
 
-  // ==================== 1. XAVFSIZ STATIK DARAJADAGI BACKEND (GitHub Pages) ====================
-  const STORE_KEY = "maktab49_secure_store_v1";
-  const SESSION_KEY = "maktab49_active_session_v1";
+  // ==================== 1. INDEXEDDB MEDIA XOTIRA (GitHub Pages uchun) ====================
+  const IDB_NAME = "maktab49_media_db";
+  const IDB_STORE = "media_blobs";
+  const blobUrlCache = new Map();
+
+  function openMediaDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) {
+          db.createObjectStore(IDB_STORE);
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function saveBlobToIDB(key, blob) {
+    const db = await openMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).put(blob, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function getBlobUrlFromIDB(key) {
+    if (blobUrlCache.has(key)) return blobUrlCache.get(key);
+    const db = await openMediaDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(IDB_STORE, "readonly");
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => {
+        if (req.result instanceof Blob) {
+          const u = URL.createObjectURL(req.result);
+          blobUrlCache.set(key, u);
+          resolve(u);
+        } else {
+          resolve("");
+        }
+      };
+      req.onerror = () => resolve("");
+    });
+  }
+
+  async function deleteBlobFromIDB(key) {
+    try {
+      const db = await openMediaDB();
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).delete(key);
+      if (blobUrlCache.has(key)) {
+        URL.revokeObjectURL(blobUrlCache.get(key));
+        blobUrlCache.delete(key);
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function resolveMediaPath(path) {
+    if (typeof path === "string" && path.startsWith("idb://")) {
+      return await getBlobUrlFromIDB(path.slice(6));
+    }
+    return path || "";
+  }
+
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Faylni o'qib bo'lmadi."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ==================== 2. XAVFSIZ STATIK BACKEND (GitHub Pages) ====================
+  const STORE_KEY = "maktab49_secure_store_v2";
+  const SESSION_KEY = "maktab49_active_session_v2";
   const RATE_KEY = "maktab49_rate_limit_v1";
   const MAX_ATTEMPTS = 5;
   const LOCKOUT_MS = 15 * 60 * 1000;
@@ -88,16 +168,6 @@
           is_active: 1,
           created_at: now,
         },
-        {
-          id: 3,
-          username: "oqituvchi49",
-          password_hash: "pbkdf2_sha256$260000$69112c2d14936f232b321d3718218e818585f043b4c292c2ca4ef7bc7cd07e83$a05dc19e11e56a3d15ee6b15be54c0e2561759f4a1ed4502c8d7dab8c77295bd",
-          full_name: "49-maktab xodimi",
-          role: "teacher",
-          position: "O'qituvchi",
-          is_active: 1,
-          created_at: now,
-        },
       ],
       school: {
         school_number: "49",
@@ -119,46 +189,11 @@
         admin_name: "Matsapayev Bekzod Dilshod o'g'li",
       },
       leadership: [
-        {
-          id: 1,
-          full_name: "Alimov Elyor Kuriyaz o'g'li",
-          position: "Maktab direktori",
-          category: "Direktor",
-          phone: "+998 88 654 30 06",
-          bio: "49-sonli umumiy o'rta ta'lim maktabining umumiy boshqaruvi, ta'lim sifati va rivojlanish strategiyasiga mas'ul.",
-        },
-        {
-          id: 2,
-          full_name: "Matniyazov Muzaffar Ayitovich",
-          position: "Direktor o'rinbosari",
-          category: "Direktor o'rinbosari",
-          phone: "+998 88 654 30 06",
-          bio: "O'quv-tarbiya jarayonini tashkil etish, dars jadvali va pedagogik faoliyatni muvofiqlashtirish bo'yicha mas'ul.",
-        },
-        {
-          id: 3,
-          full_name: "Abduraimov G'ayrat Tajiboy o'g'li",
-          position: "Direktor o'rinbosari",
-          category: "Direktor o'rinbosari",
-          phone: "+998 77 312 84 85",
-          bio: "Ma'naviy-ma'rifiy ishlar, o'quvchilar intizomi va maktab jamoasini qo'llab-quvvatlash bo'yicha mas'ul.",
-        },
-        {
-          id: 4,
-          full_name: "Atadjanov Ikram Xakimovich",
-          position: "Boshqaruv xodimi",
-          category: "Boshqaruv xodimi",
-          phone: "+998 77 312 84 85",
-          bio: "Maktabning ma'muriy-xo'jalik va tashkiliy boshqaruv jarayonlariga mas'ul xodim.",
-        },
-        {
-          id: 5,
-          full_name: "Matsapayev Bekzod Dilshod o'g'li",
-          position: "Tizim administratori",
-          category: "Axborot xavfsizligi va IT",
-          phone: "+998 88 654 30 06 / +998 77 312 84 85",
-          bio: "Maktab 49 ta'lim platformasining texnik barqarorligi, ma'lumotlar xavfsizligi va foydalanuvchi murojaatlariga mas'ul.",
-        },
+        { id: 1, full_name: "Alimov Elyor Kuriyaz o'g'li", position: "Maktab direktori", category: "Direktor", phone: "+998 88 654 30 06", bio: "49-sonli umumiy o'rta ta'lim maktabining umumiy boshqaruvi, ta'lim sifati va rivojlanish strategiyasiga mas'ul." },
+        { id: 2, full_name: "Matniyazov Muzaffar Ayitovich", position: "Direktor o'rinbosari", category: "Direktor o'rinbosari", phone: "+998 88 654 30 06", bio: "O'quv-tarbiya jarayonini tashkil etish, dars jadvali va pedagogik faoliyatni muvofiqlashtirish bo'yicha mas'ul." },
+        { id: 3, full_name: "Abduraimov G'ayrat Tajiboy o'g'li", position: "Direktor o'rinbosari", category: "Direktor o'rinbosari", phone: "+998 77 312 84 85", bio: "Ma'naviy-ma'rifiy ishlar, o'quvchilar intizomi va maktab jamoasini qo'llab-quvvatlash bo'yicha mas'ul." },
+        { id: 4, full_name: "Atadjanov Ikram Xakimovich", position: "Boshqaruv xodimi", category: "Boshqaruv xodimi", phone: "+998 77 312 84 85", bio: "Maktabning ma'muriy-xo'jalik va tashkiliy boshqaruv jarayonlariga mas'ul xodim." },
+        { id: 5, full_name: "Matsapayev Bekzod Dilshod o'g'li", position: "Tizim administratori", category: "Axborot xavfsizligi va IT", phone: "+998 88 654 30 06 / +998 77 312 84 85", bio: "Maktab 49 ta'lim platformasining texnik barqarorligi, ma'lumotlar xavfsizligi va foydalanuvchi murojaatlariga mas'ul." },
       ],
       teachers: [
         { id: 1, full_name: "Allabergenova Nasiba Ismoilovna", subject: "O'qituvchi", category: "Pedagog xodim", phone: "", experience_years: 0 },
@@ -179,50 +214,46 @@
         { id: 6, title: "Davlat ramzlari va e'lonlar burchagi", category: "Ichki ko'rinish", description: "O'zbekiston va Qoraqalpog'iston davlat ramzlari, buyruqlar, e'lonlar va yurist maslahati stendlari.", image_path: "hall_board.jpg" },
         { id: 7, title: "O'quv binosi yo'lagi", category: "Ichki ko'rinish", description: "Milliy uyg'onish davri ma'rifatparvarlari portretlari bilan bezatilgan toza va keng maktab yo'lagi.", image_path: "corridor.jpg" },
       ],
-      videos: [
+      events: [
         {
           id: 1,
-          title: "O'quvchilar",
-          category: "Maktab hayoti",
+          title: "O'quvchilar tadbiri",
+          media_type: "video",
+          event_date: "2026-11-25",
           description: "49-sonli umumiy o'rta ta'lim maktabi o'quvchilari hayotidan videolavha.",
-          video_path: "oquvchilar.mp4",
+          media_path: "oquvchilar.mp4",
           poster_path: "entrance.jpg",
+          created_at: now,
         },
       ],
       schedule: [
-        // Dushanba (1)
         { id: 1, class_name: "10-A", day_of_week: 1, lesson_number: 1, time_range: "08:30 - 09:15", subject: "Kelajak soati" },
         { id: 2, class_name: "10-A", day_of_week: 1, lesson_number: 2, time_range: "09:20 - 10:05", subject: "Adabiyot" },
         { id: 3, class_name: "10-A", day_of_week: 1, lesson_number: 3, time_range: "10:10 - 10:55", subject: "Rus tili" },
         { id: 4, class_name: "10-A", day_of_week: 1, lesson_number: 4, time_range: "11:00 - 11:45", subject: "Algebra" },
         { id: 5, class_name: "10-A", day_of_week: 1, lesson_number: 5, time_range: "11:50 - 12:35", subject: "Geografiya" },
-        // Seshanba (2)
         { id: 6, class_name: "10-A", day_of_week: 2, lesson_number: 1, time_range: "08:30 - 09:15", subject: "O'zbekiston tarixi" },
         { id: 7, class_name: "10-A", day_of_week: 2, lesson_number: 2, time_range: "09:20 - 10:05", subject: "Fizika" },
         { id: 8, class_name: "10-A", day_of_week: 2, lesson_number: 3, time_range: "10:10 - 10:55", subject: "Huquq" },
         { id: 9, class_name: "10-A", day_of_week: 2, lesson_number: 4, time_range: "11:00 - 11:45", subject: "Biologiya" },
         { id: 10, class_name: "10-A", day_of_week: 2, lesson_number: 5, time_range: "11:50 - 12:35", subject: "Jismoniy tarbiya" },
         { id: 11, class_name: "10-A", day_of_week: 2, lesson_number: 6, time_range: "12:40 - 13:25", subject: "Algebra" },
-        // Chorshanba (3)
         { id: 12, class_name: "10-A", day_of_week: 3, lesson_number: 1, time_range: "08:30 - 09:15", subject: "Ingliz tili" },
         { id: 13, class_name: "10-A", day_of_week: 3, lesson_number: 2, time_range: "09:20 - 10:05", subject: "Tarbiya" },
         { id: 14, class_name: "10-A", day_of_week: 3, lesson_number: 3, time_range: "10:10 - 10:55", subject: "Informatika" },
         { id: 15, class_name: "10-A", day_of_week: 3, lesson_number: 4, time_range: "11:00 - 11:45", subject: "Ona tili" },
         { id: 16, class_name: "10-A", day_of_week: 3, lesson_number: 5, time_range: "11:50 - 12:35", subject: "ChQBT" },
-        // Payshanba (4)
         { id: 17, class_name: "10-A", day_of_week: 4, lesson_number: 1, time_range: "08:30 - 09:15", subject: "Adabiyot" },
         { id: 18, class_name: "10-A", day_of_week: 4, lesson_number: 2, time_range: "09:20 - 10:05", subject: "Geografiya" },
         { id: 19, class_name: "10-A", day_of_week: 4, lesson_number: 3, time_range: "10:10 - 10:55", subject: "Qoraqalpoq tili" },
         { id: 20, class_name: "10-A", day_of_week: 4, lesson_number: 4, time_range: "11:00 - 11:45", subject: "ChQBT" },
         { id: 21, class_name: "10-A", day_of_week: 4, lesson_number: 5, time_range: "11:50 - 12:35", subject: "Kimyo" },
         { id: 22, class_name: "10-A", day_of_week: 4, lesson_number: 6, time_range: "12:40 - 13:25", subject: "Fizika" },
-        // Juma (5)
         { id: 23, class_name: "10-A", day_of_week: 5, lesson_number: 1, time_range: "08:30 - 09:15", subject: "Jismoniy tarbiya" },
         { id: 24, class_name: "10-A", day_of_week: 5, lesson_number: 2, time_range: "09:20 - 10:05", subject: "Algebra" },
         { id: 25, class_name: "10-A", day_of_week: 5, lesson_number: 3, time_range: "10:10 - 10:55", subject: "Informatika" },
         { id: 26, class_name: "10-A", day_of_week: 5, lesson_number: 4, time_range: "11:00 - 11:45", subject: "Kimyo" },
         { id: 27, class_name: "10-A", day_of_week: 5, lesson_number: 5, time_range: "11:50 - 12:35", subject: "Geometriya" },
-        // Shanba (6)
         { id: 28, class_name: "10-A", day_of_week: 6, lesson_number: 1, time_range: "08:30 - 09:15", subject: "Qoraqalpoq tarixi" },
         { id: 29, class_name: "10-A", day_of_week: 6, lesson_number: 2, time_range: "09:20 - 10:05", subject: "Rus tili" },
         { id: 30, class_name: "10-A", day_of_week: 6, lesson_number: 3, time_range: "10:10 - 10:55", subject: "Geometriya" },
@@ -247,7 +278,11 @@
   function loadLocalStore() {
     try {
       const raw = localStorage.getItem(STORE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed.events)) parsed.events = getSeedData().events;
+        return parsed;
+      }
     } catch { /* ignore */ }
     const seed = getSeedData();
     localStorage.setItem(STORE_KEY, JSON.stringify(seed));
@@ -294,9 +329,7 @@
       const attempts = (all[key] || []).filter((t) => now - t < LOCKOUT_MS);
       all[key] = attempts;
       localStorage.setItem(RATE_KEY, JSON.stringify(all));
-      if (attempts.length >= MAX_ATTEMPTS) {
-        return Math.ceil((LOCKOUT_MS - (now - attempts[0])) / 1000);
-      }
+      if (attempts.length >= MAX_ATTEMPTS) return Math.ceil((LOCKOUT_MS - (now - attempts[0])) / 1000);
       return 0;
     } catch {
       return 0;
@@ -351,7 +384,7 @@
       if (user.role !== "admin" && user.role !== "director") {
         addAudit(store, "LOGIN_DENIED", user.username, "Faqat admin va direktor kirishi mumkin.", "warning");
         saveLocalStore(store);
-        throw new Error("Tizimga kirish faqat Tizim administratori va Maktab direktori uchun! Qolgan foydalanuvchilar saytni logindan o'tmasdan kuzatishlari mumkin.");
+        throw new Error("Tizimga kirish faqat Tizim administratori va Maktab direktori uchun!");
       }
       clearStaticFailure(username);
       const pubUser = { id: user.id, username: user.username, full_name: user.full_name, role: user.role, position: user.position };
@@ -364,6 +397,7 @@
 
     const sess = getStaticSession();
     const isManager = Boolean(sess && (sess.user.role === "admin" || sess.user.role === "director"));
+    const isAdmin = Boolean(sess && sess.user.role === "admin");
 
     if (url === "/api/dashboard" && method === "GET") {
       return {
@@ -371,7 +405,7 @@
         leadership: store.leadership,
         teachers: store.teachers,
         gallery: store.gallery,
-        videos: store.videos,
+        events: store.events,
         schedule: store.schedule,
         appeals: isManager ? store.appeals : [],
       };
@@ -404,8 +438,56 @@
       return { ok: true };
     }
 
+    if (url === "/api/auth/change-password" && method === "POST") {
+      if (!isAdmin) throw new Error("Parol o'zgartirish bo'limi faqat Tizim administratori uchun!");
+      const u = store.users.find((x) => x.id === sess.user.id);
+      if (!u || !(await verifyPasswordWeb(body.current_password || "", u.password_hash))) {
+        throw new Error("Joriy parol noto'g'ri kiritildi.");
+      }
+      const pwErr = validatePasswordStrength(body.new_password);
+      if (pwErr) throw new Error(pwErr);
+      u.password_hash = await hashPasswordWeb(body.new_password);
+      addAudit(store, "PASSWORD_CHANGE", u.username, "Administrator parolini yangiladi.", "info");
+      saveLocalStore(store);
+      return { ok: true, message: "Admin paroli muvaffaqiyatli va xavfsiz yangilandi!" };
+    }
+
+    if (url === "/api/admin/reset-password" && method === "POST") {
+      if (!isAdmin) throw new Error("Faqat Tizim administratori parollarni o'zgartira oladi!");
+      const target = store.users.find((x) => x.username.toLowerCase() === String(body.username || "").trim().toLowerCase());
+      if (!target) throw new Error("Bunday loginli hisob topilmadi.");
+      const pwErr = validatePasswordStrength(body.new_password);
+      if (pwErr) throw new Error(pwErr);
+      target.password_hash = await hashPasswordWeb(body.new_password);
+      addAudit(store, "ADMIN_PASSWORD_RESET", sess.user.username, `${target.username} paroli yangilandi.`, "warning");
+      saveLocalStore(store);
+      return { ok: true, message: `"${target.username}" hisobining paroli yangilandi!` };
+    }
+
+    if (url === "/api/admin/users" && method === "POST") {
+      if (!isAdmin) throw new Error("Faqat Tizim administratori yangi hisob yarata oladi.");
+      if (store.users.some((u) => u.username.toLowerCase() === String(body.username || "").toLowerCase())) {
+        throw new Error("Bunday login allaqachon mavjud.");
+      }
+      const pwErr = validatePasswordStrength(body.password);
+      if (pwErr) throw new Error(pwErr);
+      store.users.push({
+        id: Date.now(),
+        username: body.username,
+        password_hash: await hashPasswordWeb(body.password),
+        full_name: body.full_name,
+        role: body.role === "admin" ? "admin" : "director",
+        position: body.position || "Rahbariyat",
+        is_active: 1,
+        created_at: Math.floor(Date.now() / 1000),
+      });
+      addAudit(store, "USER_CREATE", sess.user.username, `Yangi hisob yaratildi: ${body.username}`, "info");
+      saveLocalStore(store);
+      return { ok: true };
+    }
+
     if (url === "/api/school" && method === "PUT") {
-      const allowed = ["total_students", "total_teachers", "deputy_directors", "phone_1", "phone_2"];
+      const allowed = ["total_students", "total_teachers", "deputy_directors", "founded_date", "phone_1", "phone_2"];
       for (const k of allowed) {
         if (body[k] !== undefined && String(body[k]).trim() !== "") {
           store.school[k] = String(body[k]).trim();
@@ -416,21 +498,42 @@
       return { ok: true, school: store.school };
     }
 
-    if (url === "/api/appeals" && method === "GET") {
-      return { appeals: store.appeals };
+    if (url === "/api/leadership" && method === "POST") {
+      store.leadership.push({
+        id: Date.now(),
+        full_name: body.full_name,
+        position: body.position,
+        category: body.position || "Rahbariyat",
+        phone: body.phone || "",
+        bio: body.bio || "",
+      });
+      addAudit(store, "LEADERSHIP_ADD", sess.user.username, `Rahbariyatga qo'shildi: ${body.full_name}`, "info");
+      saveLocalStore(store);
+      return { ok: true, leadership: store.leadership };
     }
 
-    if (url.startsWith("/api/appeals/") && method === "PUT") {
-      if (!isManager) throw new Error("Ruxsat yo'q.");
+    if (url.startsWith("/api/leadership/") && method === "PUT") {
       const id = Number(url.split("/").pop());
-      const item = store.appeals.find((a) => a.id === id);
-      if (item) item.status = body.status;
+      const item = store.leadership.find((x) => x.id === id);
+      if (!item) throw new Error("Topilmadi.");
+      item.full_name = body.full_name;
+      item.position = body.position;
+      item.phone = body.phone || "";
+      item.bio = body.bio || "";
+      addAudit(store, "LEADERSHIP_UPDATE", sess.user.username, `Rahbariyat tahrirlandi: ${body.full_name}`, "info");
       saveLocalStore(store);
-      return { ok: true, appeals: store.appeals };
+      return { ok: true, leadership: store.leadership };
+    }
+
+    if (url.startsWith("/api/leadership/") && method === "DELETE") {
+      const id = Number(url.split("/").pop());
+      store.leadership = store.leadership.filter((x) => x.id !== id);
+      addAudit(store, "LEADERSHIP_DELETE", sess.user.username, `Rahbariyat #${id} o'chirildi.`, "warning");
+      saveLocalStore(store);
+      return { ok: true, leadership: store.leadership };
     }
 
     if (url === "/api/teachers" && method === "POST") {
-      if (!isManager) throw new Error("Ruxsat yo'q.");
       if (!body.full_name || body.full_name.length < 3) throw new Error("F.I.Sh. kamida 3 ta harf bo'lishi kerak.");
       store.teachers.push({
         id: Date.now(),
@@ -447,7 +550,6 @@
     }
 
     if (url.startsWith("/api/teachers/") && method === "PUT") {
-      if (!isManager) throw new Error("Ruxsat yo'q.");
       const id = Number(url.split("/").pop());
       const t = store.teachers.find((x) => x.id === id);
       if (!t) throw new Error("O'qituvchi topilmadi.");
@@ -462,7 +564,6 @@
     }
 
     if (url.startsWith("/api/teachers/") && method === "DELETE") {
-      if (!isManager) throw new Error("Ruxsat yo'q.");
       const id = Number(url.split("/").pop());
       store.teachers = store.teachers.filter((x) => x.id !== id);
       addAudit(store, "TEACHER_DELETE", sess.user.username, `O'qituvchi #${id} o'chirildi.`, "warning");
@@ -471,7 +572,6 @@
     }
 
     if (url === "/api/schedule" && method === "PUT") {
-      if (!isManager) throw new Error("Faqat rahbariyat yoki administrator dars jadvalini o'zgartira oladi.");
       const cn = body.class_name || "10-A";
       const d = Number(body.day_of_week);
       const l = Number(body.lesson_number);
@@ -490,50 +590,46 @@
       return { ok: true, schedule: store.schedule };
     }
 
-    if (url === "/api/auth/change-password" && method === "POST") {
-      const u = store.users.find((x) => x.id === sess.user.id);
-      if (!u || !(await verifyPasswordWeb(body.current_password || "", u.password_hash))) {
-        throw new Error("Joriy parol noto'g'ri kiritildi.");
+    if (url.startsWith("/api/events/") && method === "DELETE") {
+      const id = Number(url.split("/").pop());
+      const ev = store.events.find((x) => x.id === id);
+      if (ev && typeof ev.media_path === "string" && ev.media_path.startsWith("idb://")) {
+        await deleteBlobFromIDB(ev.media_path.slice(6));
       }
-      const pwErr = validatePasswordStrength(body.new_password);
-      if (pwErr) throw new Error(pwErr);
-      u.password_hash = await hashPasswordWeb(body.new_password);
-      addAudit(store, "PASSWORD_CHANGE", u.username, "Foydalanuvchi parolini yangiladi.", "info");
+      store.events = store.events.filter((x) => x.id !== id);
+      addAudit(store, "EVENT_DELETE", sess.user.username, `Tadbir #${id} o'chirildi.`, "warning");
       saveLocalStore(store);
-      return { ok: true, message: "Parol muvaffaqiyatli va xavfsiz yangilandi!" };
+      return { ok: true, events: store.events };
     }
 
-    if (url === "/api/admin/users" && method === "POST") {
-      if (sess.user.role !== "admin") throw new Error("Faqat tizim administratori yangi foydalanuvchi yarata oladi.");
-      if (store.users.some((u) => u.username.toLowerCase() === String(body.username || "").toLowerCase())) {
-        throw new Error("Bunday login allaqachon mavjud.");
+    if (url.startsWith("/api/gallery/") && method === "DELETE") {
+      const id = Number(url.split("/").pop());
+      const g = store.gallery.find((x) => x.id === id);
+      if (g && typeof g.image_path === "string" && g.image_path.startsWith("idb://")) {
+        await deleteBlobFromIDB(g.image_path.slice(6));
       }
-      const pwErr = validatePasswordStrength(body.password);
-      if (pwErr) throw new Error(pwErr);
-      store.users.push({
-        id: Date.now(),
-        username: body.username,
-        password_hash: await hashPasswordWeb(body.password),
-        full_name: body.full_name,
-        role: body.role || "teacher",
-        position: body.position || "O'qituvchi",
-        is_active: 1,
-        created_at: Math.floor(Date.now() / 1000),
-      });
-      addAudit(store, "USER_CREATE", sess.user.username, `Yangi hisob yaratildi: ${body.username} (${body.role})`, "info");
+      store.gallery = store.gallery.filter((x) => x.id !== id);
+      addAudit(store, "GALLERY_DELETE", sess.user.username, `Sinf/maktab rasmi #${id} o'chirildi.`, "warning");
       saveLocalStore(store);
-      return { ok: true };
+      return { ok: true, gallery: store.gallery };
     }
 
-    if (url === "/api/admin/security" && method === "GET") {
-      if (!isManager) throw new Error("Ruxsat yo'q.");
-      return { audit_logs: store.audit_logs };
+    if (url === "/api/appeals" && method === "GET") return { appeals: store.appeals };
+
+    if (url.startsWith("/api/appeals/") && method === "PUT") {
+      const id = Number(url.split("/").pop());
+      const item = store.appeals.find((a) => a.id === id);
+      if (item) item.status = body.status;
+      saveLocalStore(store);
+      return { ok: true, appeals: store.appeals };
     }
+
+    if (url === "/api/admin/security" && method === "GET") return { audit_logs: store.audit_logs };
 
     throw new Error("So'rov manzili topilmadi.");
   }
 
-  // ==================== 2. ASOSIY ILOVA HOLATI VA UI ====================
+  // ==================== 3. ASOSIY ILOVA HOLATI VA UI ====================
   let useStaticMode = false;
 
   const state = {
@@ -543,7 +639,7 @@
     leadership: [],
     teachers: [],
     gallery: [],
-    videos: [],
+    events: [],
     schedule: [],
     appeals: [],
     auditLogs: [],
@@ -552,6 +648,7 @@
     selectedDay: getInitialSchoolDay(),
     selectedClass: "10-A",
     galleryFilter: "all",
+    eventsFilter: "all",
     lightboxItems: [],
     lightboxIndex: 0,
   };
@@ -563,16 +660,15 @@
     teachers: "O'qituvchilar tarkibi",
     students: "O'quvchilar va ta'lim",
     gallery: "Sinf xonalari va galereya",
-    videos: "Maktab videolari",
+    events: "Maktab tadbirlari",
     location: "Maktab lokatsiyasi",
     contact: "Murojaatlar va aloqa",
-    security: "Xavfsizlik va sozlamalar",
+    security: "Boshqaruv va xavfsizlik",
   };
 
   const ROLE_LABELS = {
     admin: "Tizim administratori",
     director: "Maktab direktori",
-    teacher: "O'qituvchi / Xodim",
   };
 
   const DAYS_META = [
@@ -594,10 +690,7 @@
     6: "12:40 - 13:25",
   };
 
-  const UZ_MONTHS = [
-    "yanvar", "fevral", "mart", "aprel", "may", "iyun",
-    "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr",
-  ];
+  const UZ_MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr"];
 
   function getInitialSchoolDay() {
     const jsDay = new Date().getDay();
@@ -660,9 +753,7 @@
   }
 
   async function apiFetch(url, options = {}) {
-    if (useStaticMode) {
-      return staticApiDispatch(url, options);
-    }
+    if (useStaticMode) return staticApiDispatch(url, options);
     const headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
     if (state.csrfToken && options.method && options.method !== "GET") {
       headers["X-CSRF-Token"] = state.csrfToken;
@@ -755,9 +846,7 @@
     appView.classList.remove("hidden");
   }
 
-  document.querySelectorAll("[data-open-login]").forEach((btn) => {
-    btn.addEventListener("click", openLoginScreen);
-  });
+  document.querySelectorAll("[data-open-login]").forEach((btn) => btn.addEventListener("click", openLoginScreen));
   document.getElementById("back-to-site-btn")?.addEventListener("click", closeLoginScreen);
 
   function syncRoleVisibility() {
@@ -837,16 +926,16 @@
     state.leadership = data.leadership || [];
     state.teachers = data.teachers || [];
     state.gallery = data.gallery || [];
-    state.videos = data.videos || [];
+    state.events = data.events || [];
     state.schedule = data.schedule || [];
     state.appeals = data.appeals || [];
 
-    renderHome();
+    await renderHome();
     renderSchedule();
     renderLeadership();
     renderTeachers();
-    renderGallery();
-    renderVideos();
+    await renderGallery();
+    await renderEvents();
     renderLocation();
     renderAppeals();
     fillSchoolEditForm();
@@ -855,38 +944,6 @@
       loadSecurityAudit();
     }
   }
-
-  function fillSchoolEditForm() {
-    const f1 = document.getElementById("si-students");
-    if (!f1) return;
-    f1.value = state.school.total_students || "473";
-    document.getElementById("si-teachers").value = state.school.total_teachers || "43";
-    document.getElementById("si-deputies").value = state.school.deputy_directors || "2";
-    document.getElementById("si-phone1").value = state.school.phone_1 || "+998 88 654 30 06";
-  }
-
-  document.getElementById("school-info-form")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fb = document.getElementById("school-info-feedback");
-    fb.className = "alert-box hidden";
-    const payload = {
-      total_students: document.getElementById("si-students").value.trim(),
-      total_teachers: document.getElementById("si-teachers").value.trim(),
-      deputy_directors: document.getElementById("si-deputies").value.trim(),
-      phone_1: document.getElementById("si-phone1").value.trim(),
-    };
-    try {
-      const res = await apiFetch("/api/school", { method: "PUT", body: JSON.stringify(payload) });
-      state.school = res.school || state.school;
-      renderHome();
-      renderTeachers();
-      fb.textContent = "Maktab ko'rsatkichlari muvaffaqiyatli saqlandi!";
-      fb.className = "alert-box alert-success";
-    } catch (err) {
-      fb.textContent = err.message;
-      fb.className = "alert-box alert-error";
-    }
-  });
 
   async function loadSecurityAudit() {
     try {
@@ -908,16 +965,12 @@
   sidebarBackdrop.addEventListener("click", closeMobileSidebar);
 
   function switchPage(pageKey) {
-    if (state.currentPage === "videos" && pageKey !== "videos") {
-      document.querySelectorAll("#videos-grid video").forEach((v) => v.pause());
+    if (state.currentPage === "events" && pageKey !== "events") {
+      document.querySelectorAll("#events-grid video").forEach((v) => v.pause());
     }
     state.currentPage = pageKey;
-    document.querySelectorAll(".nav-item").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.page === pageKey);
-    });
-    document.querySelectorAll(".page-section").forEach((sec) => {
-      sec.classList.toggle("active", sec.id === `page-${pageKey}`);
-    });
+    document.querySelectorAll(".nav-item").forEach((btn) => btn.classList.toggle("active", btn.dataset.page === pageKey));
+    document.querySelectorAll(".page-section").forEach((sec) => sec.classList.toggle("active", sec.id === `page-${pageKey}`));
     document.getElementById("current-page-title").textContent = PAGE_TITLES[pageKey] || "Maktab 49";
     closeMobileSidebar();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -926,28 +979,37 @@
   document.querySelectorAll(".nav-item").forEach((btn) => btn.addEventListener("click", () => switchPage(btn.dataset.page)));
   document.querySelectorAll("[data-goto]").forEach((btn) => btn.addEventListener("click", () => switchPage(btn.dataset.goto)));
 
-  function renderHome() {
+  // ---- 1. Bosh sahifa ----
+  async function renderHome() {
     document.getElementById("stat-students").textContent = state.school.total_students || "473";
     document.getElementById("students-page-total").textContent = state.school.total_students || "473";
     document.getElementById("stat-teachers").textContent = state.school.total_teachers || "43";
     document.getElementById("stat-deputies").textContent = state.school.deputy_directors || "2";
+    const p1 = state.school.phone_1 || "+998 88 654 30 06";
+    const p2 = state.school.phone_2 || "+998 77 312 84 85";
+    const hp = document.getElementById("hero-phones");
+    if (hp) {
+      hp.innerHTML = `<a href="tel:${esc(p1.replace(/\s+/g, ""))}">${esc(p1.replace(/^\+998\s*/, ""))}</a> • <a href="tel:${esc(p2.replace(/\s+/g, ""))}">${esc(p2.replace(/^\+998\s*/, ""))}</a>`;
+    }
 
     const mini = document.getElementById("home-mini-gallery");
     const previewItems = state.gallery.slice(1, 5);
-    mini.innerHTML = previewItems
+    const resolved = await Promise.all(previewItems.map(async (item) => ({ ...item, _src: await resolveMediaPath(item.image_path) })));
+    mini.innerHTML = resolved
       .map(
         (item, idx) => `
-      <div class="mini-photo-card" data-preview-idx="${idx + 1}">
-        <img src="${esc(item.image_path)}" alt="${esc(item.title)}" loading="lazy" />
+      <div class="mini-photo-card" data-preview-idx="${idx}">
+        <img src="${esc(item._src)}" alt="${esc(item.title)}" loading="lazy" />
         <span>${esc(item.title)}</span>
       </div>`
       )
       .join("");
     mini.querySelectorAll(".mini-photo-card").forEach((el) => {
-      el.addEventListener("click", () => openLightbox(state.gallery, Number(el.dataset.previewIdx)));
+      el.addEventListener("click", () => openLightbox(resolved.map((x) => ({ image_path: x._src, title: x.title, description: x.description })), Number(el.dataset.previewIdx)));
     });
   }
 
+  // ---- 2. Dars jadvali (Kunlik + Haftalik) ----
   document.querySelectorAll("[data-sched-view]").forEach((btn) => {
     btn.addEventListener("click", () => {
       state.scheduleView = btn.dataset.schedView;
@@ -993,7 +1055,7 @@
     document.getElementById("daily-board-caption").textContent = `${curDayInfo.dateNum} ${curDayInfo.monthName} (${curDayInfo.full}) — ${state.selectedClass} sinf kunlik dars jadvali`;
 
     const body = document.getElementById("daily-board-body");
-    const isManager = state.user && (state.user.role === "admin" || state.user.role === "director");
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
     if (state.selectedDay === 7) {
       body.innerHTML = `<div class="sunday-notice">Yakshanba — dam olish kuni. Darslar mavjud emas.</div>`;
       return;
@@ -1009,18 +1071,9 @@
       const editableAttr = isManager ? `data-edit-slot="${state.selectedDay}:${n}"` : "";
       const editableCls = isManager ? "lesson-editable" : "";
       if (slot) {
-        cellsHtml += `
-          <div class="daily-lesson-cell ${editableCls}" data-lesson-label="${n}-dars" ${editableAttr}>
-            <div class="lesson-mobile-wrap">
-              <div class="lesson-time">${esc(slot.time_range)}</div>
-              <div class="lesson-subject-pill">${esc(slot.subject)}</div>
-            </div>
-          </div>`;
+        cellsHtml += `<div class="daily-lesson-cell ${editableCls}" data-lesson-label="${n}-dars" ${editableAttr}><div class="lesson-mobile-wrap"><div class="lesson-time">${esc(slot.time_range)}</div><div class="lesson-subject-pill">${esc(slot.subject)}</div></div></div>`;
       } else {
-        cellsHtml += `
-          <div class="daily-lesson-cell ${editableCls}" data-lesson-label="${n}-dars" ${editableAttr}>
-            <div class="lesson-mobile-wrap"><div class="lesson-empty-dash">—</div></div>
-          </div>`;
+        cellsHtml += `<div class="daily-lesson-cell ${editableCls}" data-lesson-label="${n}-dars" ${editableAttr}><div class="lesson-mobile-wrap"><div class="lesson-empty-dash">—</div></div></div>`;
       }
     }
     body.innerHTML = `<div class="daily-grid-table">${cellsHtml}</div>`;
@@ -1035,7 +1088,7 @@
   }
 
   function renderWeeklySchedule() {
-    const isManager = state.user && (state.user.role === "admin" || state.user.role === "director");
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
     const schoolDays = DAYS_META.slice(0, 6);
     const desktopWrap = document.getElementById("weekly-board-desktop");
     let rowsHtml = "";
@@ -1063,11 +1116,7 @@
           const slot = getSlot(d.day, n);
           if (slot) daySlots.push(slot);
         }
-        return `
-          <div class="weekly-day-card">
-            <div class="weekly-day-card-head">${esc(d.full)} (${daySlots.length} ta dars)</div>
-            ${daySlots.map((s) => `<div class="weekly-day-card-row ${isManager ? "lesson-editable" : ""}" ${isManager ? `data-edit-slot="${d.day}:${s.lesson_number}"` : ""}><div><strong style="color:var(--accent-indigo);margin-right:6px;">${s.lesson_number}.</strong><strong>${esc(s.subject)}</strong></div><span class="lesson-time">${esc(s.time_range)}</span></div>`).join("")}
-          </div>`;
+        return `<div class="weekly-day-card"><div class="weekly-day-card-head">${esc(d.full)} (${daySlots.length} ta dars)</div>${daySlots.map((s) => `<div class="weekly-day-card-row ${isManager ? "lesson-editable" : ""}" ${isManager ? `data-edit-slot="${d.day}:${s.lesson_number}"` : ""}><div><strong style="color:var(--accent-indigo);margin-right:6px;">${s.lesson_number}.</strong><strong>${esc(s.subject)}</strong></div><span class="lesson-time">${esc(s.time_range)}</span></div>`).join("")}</div>`;
       })
       .join("");
 
@@ -1116,28 +1165,9 @@
     }
   });
 
-  function renderLocation() {
-    const lat = state.school.location_lat || "41.572770";
-    const lng = state.school.location_lng || "60.890981";
-    const coords = `${lat}, ${lng}`;
-    document.getElementById("coords-text").textContent = coords;
-    document.getElementById("google-maps-link").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-    document.getElementById("yandex-maps-link").href = `https://yandex.uz/maps/?pt=${lng},${lat}&z=17&l=sat,skl`;
-  }
-
-  document.getElementById("copy-coords-btn").addEventListener("click", async (e) => {
-    const coords = document.getElementById("coords-text").textContent;
-    try {
-      await navigator.clipboard.writeText(coords);
-      const orig = e.target.textContent;
-      e.target.textContent = "Nusxalandi ✓";
-      setTimeout(() => (e.target.textContent = orig), 1800);
-    } catch {
-      window.prompt("Koordinatani nusxalang:", coords);
-    }
-  });
-
+  // ---- 3. Rahbariyat (To'liq tahrirlash bilan) ----
   function renderLeadership() {
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
     const grid = document.getElementById("leadership-grid");
     grid.innerHTML = state.leadership
       .map((p) => {
@@ -1150,11 +1180,75 @@
           </div>
           <p class="leader-bio">${esc(p.bio)}</p>
           <div class="leader-phone">Aloqa: ${esc(p.phone || "+998 88 654 30 06")}</div>
+          ${isManager ? `<div class="card-admin-bar"><button type="button" class="btn-outline-sm" data-edit-lead="${p.id}">Tahrirlash</button><button type="button" class="btn-danger-sm" data-del-lead="${p.id}">O'chirish</button></div>` : ""}
         </article>`;
       })
       .join("");
+
+    if (isManager) {
+      grid.querySelectorAll("[data-edit-lead]").forEach((btn) => btn.addEventListener("click", () => openEditLeadership(Number(btn.dataset.editLead))));
+      grid.querySelectorAll("[data-del-lead]").forEach((btn) => btn.addEventListener("click", () => handleDeleteLeadership(Number(btn.dataset.delLead))));
+    }
   }
 
+  document.getElementById("open-add-leadership-btn")?.addEventListener("click", () => {
+    document.getElementById("lead-modal-title").textContent = "Yangi rahbariyat a'zosi qo'shish";
+    document.getElementById("lf-id").value = "";
+    document.getElementById("lf-fullname").value = "";
+    document.getElementById("lf-position").value = "";
+    document.getElementById("lf-phone").value = "";
+    document.getElementById("lf-bio").value = "";
+    document.getElementById("lf-error").classList.add("hidden");
+    openModal("leadership-modal");
+  });
+
+  function openEditLeadership(id) {
+    const p = state.leadership.find((x) => x.id === id);
+    if (!p) return;
+    document.getElementById("lead-modal-title").textContent = "Rahbariyat ma'lumotini tahrirlash";
+    document.getElementById("lf-id").value = String(p.id);
+    document.getElementById("lf-fullname").value = p.full_name;
+    document.getElementById("lf-position").value = p.position;
+    document.getElementById("lf-phone").value = p.phone || "";
+    document.getElementById("lf-bio").value = p.bio || "";
+    document.getElementById("lf-error").classList.add("hidden");
+    openModal("leadership-modal");
+  }
+
+  document.getElementById("leadership-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("lf-error");
+    errEl.classList.add("hidden");
+    const id = document.getElementById("lf-id").value;
+    const payload = {
+      full_name: document.getElementById("lf-fullname").value.trim(),
+      position: document.getElementById("lf-position").value.trim(),
+      phone: document.getElementById("lf-phone").value.trim(),
+      bio: document.getElementById("lf-bio").value.trim(),
+    };
+    try {
+      const res = id
+        ? await apiFetch(`/api/leadership/${id}`, { method: "PUT", body: JSON.stringify(payload) })
+        : await apiFetch("/api/leadership", { method: "POST", body: JSON.stringify(payload) });
+      state.leadership = res.leadership || state.leadership;
+      renderLeadership();
+      closeModal("leadership-modal");
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.remove("hidden");
+    }
+  });
+
+  async function handleDeleteLeadership(id) {
+    if (!window.confirm("Ushbu rahbariyat a'zosini o'chirishni tasdiqlaysizmi?")) return;
+    try {
+      const res = await apiFetch(`/api/leadership/${id}`, { method: "DELETE" });
+      state.leadership = res.leadership || [];
+      renderLeadership();
+    } catch (err) { window.alert(err.message); }
+  }
+
+  // ---- 4. O'qituvchilar ----
   const teacherSearchInput = document.getElementById("teacher-search");
   teacherSearchInput.addEventListener("input", renderTeachers);
 
@@ -1162,7 +1256,7 @@
     const query = teacherSearchInput.value.trim().toLowerCase();
     const filtered = state.teachers.filter((t) => t.full_name.toLowerCase().includes(query) || t.subject.toLowerCase().includes(query) || t.category.toLowerCase().includes(query));
     document.getElementById("teachers-count-badge").textContent = `Jami: ${state.school.total_teachers || "43"} nafar • Tizimda: ${state.teachers.length} nafar`;
-    const isManager = state.user && (state.user.role === "admin" || state.user.role === "director");
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
     const container = document.getElementById("teachers-list");
     if (!filtered.length) {
       container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-soft);">Mos o'qituvchi topilmadi.</div>`;
@@ -1249,55 +1343,264 @@
     } catch (err) { window.alert(err.message); }
   }
 
+  // ---- 5. Sinf xonalari va Galereya (Rasm yuklash + O'chirish) ----
   document.getElementById("gallery-filters").addEventListener("click", (e) => {
     const btn = e.target.closest(".filter-chip");
     if (!btn) return;
     state.galleryFilter = btn.dataset.cat;
-    document.querySelectorAll(".filter-chip").forEach((c) => c.classList.toggle("active", c === btn));
+    document.querySelectorAll("#gallery-filters .filter-chip").forEach((c) => c.classList.toggle("active", c === btn));
     renderGallery();
   });
 
-  function renderGallery() {
+  async function renderGallery() {
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
     const items = state.galleryFilter === "all" ? state.gallery : state.gallery.filter((g) => g.category === state.galleryFilter);
+    const resolved = await Promise.all(items.map(async (item) => ({ ...item, _src: await resolveMediaPath(item.image_path) })));
     const grid = document.getElementById("gallery-grid");
-    grid.innerHTML = items
+    grid.innerHTML = resolved
       .map(
         (item, idx) => `
-      <article class="gallery-card" data-gal-idx="${idx}">
-        <div class="gallery-img-wrap"><img src="${esc(item.image_path)}" alt="${esc(item.title)}" loading="lazy" /><span class="gallery-cat-badge">${esc(item.category)}</span></div>
-        <div class="gallery-card-body"><h4>${esc(item.title)}</h4><p>${esc(item.description)}</p></div>
+      <article class="gallery-card">
+        <div class="gallery-img-wrap" data-gal-idx="${idx}"><img src="${esc(item._src)}" alt="${esc(item.title)}" loading="lazy" /><span class="gallery-cat-badge">${esc(item.category)}</span></div>
+        <div class="gallery-card-body">
+          <h4>${esc(item.title)}</h4>
+          <p>${esc(item.description)}</p>
+          ${isManager ? `<div class="card-admin-bar"><button type="button" class="btn-danger-sm" data-del-gal="${item.id}">O'chirish</button></div>` : ""}
+        </div>
       </article>`
       )
       .join("");
-    grid.querySelectorAll(".gallery-card").forEach((card) => card.addEventListener("click", () => openLightbox(items, Number(card.dataset.galIdx))));
+    grid.querySelectorAll("[data-gal-idx]").forEach((el) => {
+      el.addEventListener("click", () => openLightbox(resolved.map((x) => ({ image_path: x._src, title: x.title, description: x.description })), Number(el.dataset.galIdx)));
+    });
+    if (isManager) {
+      grid.querySelectorAll("[data-del-gal]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!window.confirm("Ushbu rasmni o'chirishni tasdiqlaysizmi?")) return;
+          const res = await apiFetch(`/api/gallery/${btn.dataset.delGal}`, { method: "DELETE" });
+          state.gallery = res.gallery || [];
+          await renderGallery();
+          await renderHome();
+        });
+      });
+    }
   }
 
-  function renderVideos() {
-    const grid = document.getElementById("videos-grid");
-    if (!grid) return;
-    if (!state.videos.length) {
-      grid.innerHTML = `<div class="card" style="color:var(--text-soft);">Hozircha videolar qo'shilmagan.</div>`;
+  document.getElementById("open-upload-gallery-btn")?.addEventListener("click", () => {
+    document.getElementById("gallery-upload-form").reset();
+    document.getElementById("gal-error").classList.add("hidden");
+    openModal("gallery-upload-modal");
+  });
+
+  document.getElementById("gallery-upload-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("gal-error");
+    const submitBtn = document.getElementById("gal-submit-btn");
+    errEl.classList.add("hidden");
+    const file = document.getElementById("gal-file").files[0];
+    const title = document.getElementById("gal-title").value.trim();
+    const category = document.getElementById("gal-cat").value;
+    const description = document.getElementById("gal-desc").value.trim();
+    if (!file || !file.type.startsWith("image/")) {
+      errEl.textContent = "Iltimos, rasm faylini tanlang.";
+      errEl.classList.remove("hidden");
       return;
     }
-    grid.innerHTML = state.videos
-      .map(
-        (v) => `
-      <article class="video-card">
-        <div class="video-player-wrap">
-          <video controls playsinline preload="metadata" ${v.poster_path ? `poster="${esc(v.poster_path)}"` : ""}>
-            <source src="${esc(v.video_path)}" type="video/mp4" />
-            Brauzeringiz video ijrosini qo'llab-quvvatlamaydi.
-          </video>
-        </div>
-        <div class="video-card-body">
-          <div class="video-card-head"><h4>${esc(v.title)}</h4><span class="count-badge">${esc(v.category)}</span></div>
-          <p>${esc(v.description)}</p>
-        </div>
-      </article>`
-      )
-      .join("");
+    submitBtn.disabled = true;
+    try {
+      if (useStaticMode) {
+        const key = `gal_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        await saveBlobToIDB(key, file);
+        const store = loadLocalStore();
+        store.gallery.push({ id: Date.now(), title, category, description, image_path: `idb://${key}` });
+        addAudit(store, "GALLERY_ADD", state.user.username, `Yangi sinf/maktab rasmi: ${title}`, "info");
+        saveLocalStore(store);
+        state.gallery = store.gallery;
+      } else {
+        const dataUrl = await fileToDataUrl(file);
+        const res = await apiFetch("/api/gallery", { method: "POST", body: JSON.stringify({ title, category, description, media_data: dataUrl }) });
+        state.gallery = res.gallery || [];
+      }
+      await renderGallery();
+      await renderHome();
+      closeModal("gallery-upload-modal");
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.remove("hidden");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ---- 6. TADBIRLAR (Rasm yuklash + Video yuklash + Saqlash) ----
+  document.getElementById("events-filters")?.addEventListener("click", (e) => {
+    const btn = e.target.closest(".filter-chip");
+    if (!btn) return;
+    state.eventsFilter = btn.dataset.evFilter;
+    document.querySelectorAll("#events-filters .filter-chip").forEach((c) => c.classList.toggle("active", c === btn));
+    renderEvents();
+  });
+
+  function openEventUploadModal(mediaType) {
+    document.getElementById("event-upload-form").reset();
+    document.getElementById("ev-error").classList.add("hidden");
+    document.getElementById("ev-media-type").value = mediaType;
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById("ev-date").value = today;
+    const fileInput = document.getElementById("ev-file");
+    if (mediaType === "video") {
+      document.getElementById("event-modal-title").textContent = "Tadbirga video yuklash";
+      document.getElementById("ev-file-label").textContent = "Video faylini tanlang (MP4, WEBM)";
+      fileInput.accept = "video/mp4,video/webm,video/*";
+    } else {
+      document.getElementById("event-modal-title").textContent = "Tadbirga rasm yuklash";
+      document.getElementById("ev-file-label").textContent = "Rasm faylini tanlang (JPG, PNG, WEBP)";
+      fileInput.accept = "image/*";
+    }
+    openModal("event-upload-modal");
   }
 
+  document.getElementById("open-upload-event-photo-btn")?.addEventListener("click", () => openEventUploadModal("photo"));
+  document.getElementById("open-upload-event-video-btn")?.addEventListener("click", () => openEventUploadModal("video"));
+
+  document.getElementById("event-upload-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("ev-error");
+    const submitBtn = document.getElementById("ev-submit-btn");
+    errEl.classList.add("hidden");
+
+    const mediaType = document.getElementById("ev-media-type").value;
+    const title = document.getElementById("ev-title").value.trim();
+    const eventDate = document.getElementById("ev-date").value;
+    const description = document.getElementById("ev-desc").value.trim();
+    const file = document.getElementById("ev-file").files[0];
+
+    if (!file) {
+      errEl.textContent = "Iltimos, faylni tanlang.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    if (mediaType === "photo" && !file.type.startsWith("image/")) {
+      errEl.textContent = "Faqat rasm faylini (JPG, PNG, WEBP) yuklang.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    if (mediaType === "video" && !file.type.startsWith("video/")) {
+      errEl.textContent = "Faqat video faylini (MP4, WEBM) yuklang.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      errEl.textContent = "Fayl hajmi 50 MB dan oshmasligi kerak.";
+      errEl.classList.remove("hidden");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Yuklanmoqda...";
+    try {
+      if (useStaticMode) {
+        const key = `ev_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        await saveBlobToIDB(key, file);
+        const store = loadLocalStore();
+        store.events.unshift({
+          id: Date.now(),
+          title,
+          media_type: mediaType,
+          event_date: eventDate,
+          description: description || "49-sonli maktab tadbiri.",
+          media_path: `idb://${key}`,
+          poster_path: mediaType === "video" ? "entrance.jpg" : "",
+          created_at: Math.floor(Date.now() / 1000),
+        });
+        addAudit(store, "EVENT_ADD", state.user.username, `Yangi tadbir (${mediaType === "video" ? "video" : "rasm"}): ${title}`, "info");
+        saveLocalStore(store);
+        state.events = store.events;
+      } else {
+        const dataUrl = await fileToDataUrl(file);
+        const res = await apiFetch("/api/events", {
+          method: "POST",
+          body: JSON.stringify({ title, media_type: mediaType, event_date: eventDate, description, media_data: dataUrl }),
+        });
+        state.events = res.events || [];
+      }
+      await renderEvents();
+      closeModal("event-upload-modal");
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.remove("hidden");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Yuklash va saqlash";
+    }
+  });
+
+  async function renderEvents() {
+    const grid = document.getElementById("events-grid");
+    if (!grid) return;
+    const isManager = Boolean(state.user && (state.user.role === "admin" || state.user.role === "director"));
+    const items = state.eventsFilter === "all" ? state.events : state.events.filter((ev) => ev.media_type === state.eventsFilter);
+
+    if (!items.length) {
+      grid.innerHTML = `<div class="card" style="color:var(--text-soft);">Ushbu bo'limda hozircha tadbirlar yo'q.</div>`;
+      return;
+    }
+
+    const resolved = await Promise.all(
+      items.map(async (ev) => ({
+        ...ev,
+        _src: await resolveMediaPath(ev.media_path),
+        _poster: ev.poster_path ? await resolveMediaPath(ev.poster_path) : "",
+      }))
+    );
+
+    const photoItems = resolved.filter((x) => x.media_type === "photo");
+
+    grid.innerHTML = resolved
+      .map((ev) => {
+        const typeLabel = ev.media_type === "video" ? "Video" : "Rasm";
+        const mediaHtml =
+          ev.media_type === "video"
+            ? `<div class="video-player-wrap"><video controls playsinline preload="metadata" ${ev._poster ? `poster="${esc(ev._poster)}"` : ""}><source src="${esc(ev._src)}" type="video/mp4" />Brauzeringiz video ijrosini qo'llab-quvvatlamaydi.</video></div>`
+            : `<div class="event-photo-wrap" data-ev-photo-id="${ev.id}"><img src="${esc(ev._src)}" alt="${esc(ev.title)}" loading="lazy" /><span class="gallery-cat-badge">Rasm</span></div>`;
+        return `
+        <article class="event-card">
+          ${mediaHtml}
+          <div class="video-card-body">
+            <div class="video-card-head">
+              <h4>${esc(ev.title)}</h4>
+              <span class="count-badge">${typeLabel}${ev.event_date ? ` • ${esc(ev.event_date)}` : ""}</span>
+            </div>
+            <p>${esc(ev.description)}</p>
+            ${isManager ? `<div class="card-admin-bar"><button type="button" class="btn-danger-sm" data-del-ev="${ev.id}">O'chirish</button></div>` : ""}
+          </div>
+        </article>`;
+      })
+      .join("");
+
+    grid.querySelectorAll("[data-ev-photo-id]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const idx = photoItems.findIndex((p) => String(p.id) === el.dataset.evPhotoId);
+        openLightbox(
+          photoItems.map((p) => ({ image_path: p._src, title: p.title, description: p.description })),
+          Math.max(0, idx)
+        );
+      });
+    });
+
+    if (isManager) {
+      grid.querySelectorAll("[data-del-ev]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!window.confirm("Ushbu tadbirni o'chirishni tasdiqlaysizmi?")) return;
+          const res = await apiFetch(`/api/events/${btn.dataset.delEv}`, { method: "DELETE" });
+          state.events = res.events || [];
+          await renderEvents();
+        });
+      });
+    }
+  }
+
+  // ---- Lightbox ----
   document.querySelectorAll("[data-lightbox]").forEach((el) => {
     el.addEventListener("click", () => openLightbox([{ image_path: el.dataset.lightbox, title: el.dataset.caption || "" }], 0));
   });
@@ -1330,6 +1633,27 @@
     if (e.key === "ArrowRight") document.getElementById("lb-next").click();
   });
 
+  // ---- 7. Lokatsiya ----
+  function renderLocation() {
+    const lat = state.school.location_lat || "41.572770";
+    const lng = state.school.location_lng || "60.890981";
+    const coords = `${lat}, ${lng}`;
+    document.getElementById("coords-text").textContent = coords;
+    document.getElementById("google-maps-link").href = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    document.getElementById("yandex-maps-link").href = `https://yandex.uz/maps/?pt=${lng},${lat}&z=17&l=sat,skl`;
+  }
+
+  document.getElementById("copy-coords-btn").addEventListener("click", async (e) => {
+    const coords = document.getElementById("coords-text").textContent;
+    try {
+      await navigator.clipboard.writeText(coords);
+      const orig = e.target.textContent;
+      e.target.textContent = "Nusxalandi ✓";
+      setTimeout(() => (e.target.textContent = orig), 1800);
+    } catch { window.prompt("Koordinatani nusxalang:", coords); }
+  });
+
+  // ---- 8. Murojaatlar ----
   document.getElementById("appeal-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fb = document.getElementById("appeal-feedback");
@@ -1387,7 +1711,46 @@
     });
   }
 
-  document.getElementById("change-pw-form").addEventListener("submit", async (e) => {
+  // ---- 9. Boshqaruv: Faqat Admin parol o'zgartirishi + Maktab ko'rsatkichlari + Audit ----
+  function fillSchoolEditForm() {
+    const f1 = document.getElementById("si-students");
+    if (!f1) return;
+    f1.value = state.school.total_students || "473";
+    document.getElementById("si-teachers").value = state.school.total_teachers || "43";
+    document.getElementById("si-deputies").value = state.school.deputy_directors || "2";
+    const sf = document.getElementById("si-founded");
+    if (sf) sf.value = state.school.founded_date || "01/09/1988";
+    document.getElementById("si-phone1").value = state.school.phone_1 || "+998 88 654 30 06";
+    const sp2 = document.getElementById("si-phone2");
+    if (sp2) sp2.value = state.school.phone_2 || "+998 77 312 84 85";
+  }
+
+  document.getElementById("school-info-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fb = document.getElementById("school-info-feedback");
+    fb.className = "alert-box hidden";
+    const payload = {
+      total_students: document.getElementById("si-students").value.trim(),
+      total_teachers: document.getElementById("si-teachers").value.trim(),
+      deputy_directors: document.getElementById("si-deputies").value.trim(),
+      founded_date: document.getElementById("si-founded")?.value.trim(),
+      phone_1: document.getElementById("si-phone1").value.trim(),
+      phone_2: document.getElementById("si-phone2")?.value.trim(),
+    };
+    try {
+      const res = await apiFetch("/api/school", { method: "PUT", body: JSON.stringify(payload) });
+      state.school = res.school || state.school;
+      await renderHome();
+      renderTeachers();
+      fb.textContent = "Maktab ko'rsatkichlari muvaffaqiyatli saqlandi!";
+      fb.className = "alert-box alert-success";
+    } catch (err) {
+      fb.textContent = err.message;
+      fb.className = "alert-box alert-error";
+    }
+  });
+
+  document.getElementById("change-pw-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fb = document.getElementById("pw-feedback");
     fb.className = "alert-box hidden";
@@ -1404,13 +1767,32 @@
       fb.textContent = res.message;
       fb.className = "alert-box alert-success";
       e.target.reset();
+      loadSecurityAudit();
     } catch (err) {
       fb.textContent = err.message;
       fb.className = "alert-box alert-error";
     }
   });
 
-  document.getElementById("create-user-form").addEventListener("submit", async (e) => {
+  document.getElementById("reset-other-pw-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fb = document.getElementById("reset-pw-feedback");
+    fb.className = "alert-box hidden";
+    const username = document.getElementById("rp-username").value.trim();
+    const new_password = document.getElementById("rp-new-pw").value;
+    try {
+      const res = await apiFetch("/api/admin/reset-password", { method: "POST", body: JSON.stringify({ username, new_password }) });
+      fb.textContent = res.message;
+      fb.className = "alert-box alert-success";
+      document.getElementById("rp-new-pw").value = "";
+      loadSecurityAudit();
+    } catch (err) {
+      fb.textContent = err.message;
+      fb.className = "alert-box alert-error";
+    }
+  });
+
+  document.getElementById("create-user-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fb = document.getElementById("user-create-feedback");
     fb.className = "alert-box hidden";
@@ -1433,10 +1815,11 @@
     }
   });
 
-  document.getElementById("refresh-audit-btn").addEventListener("click", loadSecurityAudit);
+  document.getElementById("refresh-audit-btn")?.addEventListener("click", loadSecurityAudit);
 
   function renderAuditLogs() {
     const list = document.getElementById("audit-list");
+    if (!list) return;
     if (!state.auditLogs.length) {
       list.innerHTML = `<div style="color:var(--text-soft);">Yozuvlar mavjud emas.</div>`;
       return;

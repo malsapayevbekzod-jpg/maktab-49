@@ -1629,14 +1629,23 @@ button, input, select, textarea { font-family: inherit; }
 .gallery-card-body h4 { margin: 0 0 6px; font-size: 15.5px; color: var(--navy-950); }
 .gallery-card-body p { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.45; }
 
-/* ---- Videolar paneli ---- */
+/* ---- Tadbirlar paneli (Rasmlar + Videolar) ---- */
+.events-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.events-grid,
 .videos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 20px;
 }
 
-.video-card {
+.video-card,
+.event-card {
   background: var(--bg-card);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
@@ -1644,6 +1653,25 @@ button, input, select, textarea { font-family: inherit; }
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+}
+
+.event-photo-wrap {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  cursor: pointer;
+}
+
+.event-photo-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.event-photo-wrap:hover img {
+  transform: scale(1.04);
 }
 
 .video-player-wrap {
@@ -1668,6 +1696,7 @@ button, input, select, textarea { font-family: inherit; }
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
 }
 
 .video-card-head {
@@ -1690,9 +1719,21 @@ button, input, select, textarea { font-family: inherit; }
   font-size: 13.5px;
   color: var(--text-muted);
   line-height: 1.5;
+  flex: 1;
+}
+
+.card-admin-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: 6px;
+  border-top: 1px solid var(--border-soft);
 }
 
 @media (max-width: 720px) {
+  .events-grid,
   .videos-grid {
     grid-template-columns: 1fr;
   }
