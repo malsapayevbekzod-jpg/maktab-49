@@ -1,11 +1,11 @@
 {
   "version": 4,
-  "updated_at": 1795760035,
+  "updated_at": 1795760991,
   "users": [
     {
       "id": 1,
-      "username": "admin49",
-      "password_hash": "pbkdf2_sha256$260000$89d4fd24fb525b51e1cfc93e9ed4fca1a0004ee1f1f5810e5a917cbf47e1956a$2d4b1e9091e0a64649a3cf48d4821d81950f270d1fb8a3fef8ef776ec23f57cb",
+      "username": "m.bekzod49",
+      "password_hash": "pbkdf2_sha256$260000$5c1bb4f5ae41ceb9f785853332abac709a6548797181ad2f08711dd69b728c6c$98697f0eb33fae78c89db2bed575c731cdb9e06289dbd6a55a82106cff5528f4",
       "full_name": "Matsapayev Bekzod Dilshod o'g'li",
       "role": "admin",
       "position": "Tizim administratori",
@@ -493,6 +493,60 @@
   ],
   "appeals": [],
   "audit_logs": [
+    {
+      "id": 1795760991820,
+      "event_type": "PASSWORD_CHANGE",
+      "username": "m.bekzod49",
+      "ip_address": "https-client",
+      "details": "Admin login/parol yangilandi (m.bekzod49).",
+      "severity": "info",
+      "created_at": 1795760991
+    },
+    {
+      "id": 1795760904058,
+      "event_type": "LOGIN_SUCCESS",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Muvaffaqiyatli kirish (admin).",
+      "severity": "info",
+      "created_at": 1795760904
+    },
+    {
+      "id": 1795760886007,
+      "event_type": "LOGIN_FAILED",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Noto'g'ri login yoki parol (qolgan: 3).",
+      "severity": "warning",
+      "created_at": 1795760886
+    },
+    {
+      "id": 1795760859248,
+      "event_type": "LOGOUT",
+      "username": "m.bekzod",
+      "ip_address": "https-client",
+      "details": "Foydalanuvchi tizimdan chiqdi.",
+      "severity": "info",
+      "created_at": 1795760859
+    },
+    {
+      "id": 1795760040233,
+      "event_type": "PASSWORD_CHANGE",
+      "username": "m.bekzod",
+      "ip_address": "https-client",
+      "details": "Administrator parolini yangiladi.",
+      "severity": "info",
+      "created_at": 1795760040
+    },
+    {
+      "id": 1795760038715,
+      "event_type": "PASSWORD_CHANGE",
+      "username": "m.bekzod",
+      "ip_address": "https-client",
+      "details": "Administrator parolini yangiladi.",
+      "severity": "info",
+      "created_at": 1795760038
+    },
     {
       "id": 1795760035951,
       "event_type": "PASSWORD_CHANGE",
