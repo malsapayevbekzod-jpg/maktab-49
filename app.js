@@ -237,13 +237,46 @@
     } catch { /* ignore */ }
   }
 
-  async function resolveMediaPath(path) {
+  const GH_CDN_BASE = `https://cdn.jsdelivr.net/gh/${GH_OWNER}/${GH_REPO}@${GH_BRANCH}`;
+
+  async function resolveMediaPath(path, mediaType = "photo") {
     if (!path || typeof path !== "string") return "";
     if (path.startsWith("idb://")) return await getBlobUrlFromIDB(path.slice(6));
     if (path.startsWith("uploads/") && useStaticMode) {
-      return `${GH_RAW_BASE}/${path}`;
+      // Videolar uchun raw.githubusercontent.com ISHLAMAYDI (application/octet-stream + nosniff)!
+      // GitHub Pages nisbiy manzili (uploads/...) haqiqiy video/mp4 + Range streaming beradi!
+      if (mediaType === "video") {
+        // Agar lokalda shu qurilmada keshlangan blob bo'lsa (GitHub Pages 30s build kutmasdan darhol o'ynaydi)
+        const baseKey = path.split("/").pop().replace(/\.[^.]+$/, "");
+        const localUrl = await getBlobUrlFromIDB(baseKey);
+        if (localUrl) return localUrl;
+        return path;
+      }
+      // Rasmlar uchun jsDelivr CDN yoki nisbiy GitHub Pages manzili (darhol yangilanadi!)
+      return `${GH_CDN_BASE}/${path}`;
     }
     return path;
+  }
+
+  async function resolveVideoSources(path) {
+    if (!path || typeof path !== "string") return [];
+    if (path.startsWith("idb://")) {
+      const u = await getBlobUrlFromIDB(path.slice(6));
+      return u ? [u] : [];
+    }
+    if (path.startsWith("uploads/") && useStaticMode) {
+      const sources = [];
+      // 1) GitHub Pages (haqiqiy video/mp4 + Accept-Ranges: bytes, 50 MB gacha!)
+      sources.push(path);
+      // 2) jsDelivr CDN (GitHub Pages build tugashini kutmasdan 20 MB gacha darhol video/mp4!)
+      sources.push(`${GH_CDN_BASE}/${path}`);
+      // 3) Admin qurilmasida zaxira lokal blob (darhol ko'rish uchun)
+      const baseKey = path.split("/").pop().replace(/\.[^.]+$/, "");
+      const localUrl = await getBlobUrlFromIDB(baseKey);
+      if (localUrl) sources.push(localUrl);
+      return sources;
+    }
+    return [path];
   }
 
   function fileToDataUrl(file) {
@@ -1978,6 +2011,8 @@
           const ext = (lowerName.split(".").pop() || defExt).replace(/[^a-z0-9]/g, "") || defExt;
           const repoPath = `uploads/ev_${id}.${ext}`;
           extraFiles[repoPath] = await fileToBase64Content(file);
+          // Admin qurilmasida GitHub Pages 30s yangilanishini kutmasdan darhol o'ynashi uchun lokal keshga ham saqlaymiz
+          try { await saveBlobToIDB(`ev_${id}`, file); } catch { /* ignore */ }
           savedPath = repoPath;
         } else {
           const key = `ev_${id}`;
@@ -2035,8 +2070,9 @@
     const resolved = await Promise.all(
       items.map(async (ev) => ({
         ...ev,
-        _src: await resolveMediaPath(ev.media_path),
-        _poster: ev.poster_path ? await resolveMediaPath(ev.poster_path) : "",
+        _src: ev.media_type === "video" ? "" : await resolveMediaPath(ev.media_path, "photo"),
+        _videoSources: ev.media_type === "video" ? await resolveVideoSources(ev.media_path) : [],
+        _poster: ev.poster_path ? await resolveMediaPath(ev.poster_path, "photo") : "",
       }))
     );
 
@@ -2045,9 +2081,15 @@
     grid.innerHTML = resolved
       .map((ev) => {
         const typeLabel = ev.media_type === "video" ? "Video" : "Rasm";
+        const videoSourcesHtml = ev._videoSources
+          .map((src) => {
+            const mime = src.toLowerCase().endsWith(".webm") ? "video/webm" : "video/mp4";
+            return `<source src="${esc(src)}" type="${mime}" />`;
+          })
+          .join("");
         const mediaHtml =
           ev.media_type === "video"
-            ? `<div class="video-player-wrap"><video controls playsinline preload="metadata" ${ev._poster ? `poster="${esc(ev._poster)}"` : ""}><source src="${esc(ev._src)}" type="video/mp4" />Brauzeringiz video ijrosini qo'llab-quvvatlamaydi.</video></div>`
+            ? `<div class="video-player-wrap"><video controls playsinline preload="metadata" ${ev._poster ? `poster="${esc(ev._poster)}"` : ""}>${videoSourcesHtml}Brauzeringiz video ijrosini qo'llab-quvvatlamaydi.</video></div>`
             : `<div class="event-photo-wrap" data-ev-photo-id="${ev.id}"><img src="${esc(ev._src)}" alt="${esc(ev.title)}" loading="lazy" /><span class="gallery-cat-badge">Rasm</span></div>`;
         return `
         <article class="event-card">
