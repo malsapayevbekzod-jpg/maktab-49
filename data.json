@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updated_at": 1795759710,
+  "updated_at": 1795759932,
   "users": [
     {
       "id": 1,
@@ -21,6 +21,16 @@
       "position": "Maktab direktori",
       "is_active": 1,
       "created_at": 1795667400
+    },
+    {
+      "id": 1795759932182,
+      "username": "m.bekzod",
+      "password_hash": "pbkdf2_sha256$260000$9400d28c91e0a81fb532acaa6323009290d04516e98dc3ba7f931600cb5131e8$ea649537a44eea39ed8ce83ad858fd567ef5d6cec0f9beaf355459fcf3bf6d3a",
+      "full_name": "Matsapayev Bekzod",
+      "role": "admin",
+      "position": "admin",
+      "is_active": 1,
+      "created_at": 1795759932
     }
   ],
   "school": {
@@ -483,6 +493,15 @@
   ],
   "appeals": [],
   "audit_logs": [
+    {
+      "id": 1795759932230,
+      "event_type": "USER_CREATE",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Yangi hisob yaratildi: m.bekzod",
+      "severity": "info",
+      "created_at": 1795759932
+    },
     {
       "id": 1795759710784,
       "event_type": "PASSWORD_CHANGE",
