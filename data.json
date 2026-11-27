@@ -1,11 +1,11 @@
 {
   "version": 4,
-  "updated_at": 1795759291,
+  "updated_at": 1795759710,
   "users": [
     {
       "id": 1,
       "username": "admin49",
-      "password_hash": "pbkdf2_sha256$260000$a0db61dddd4078117d094889f529494c775b9fc8dd3f81c19f9bc7b0bac0c192$acbfca0048c8476a6c6542b2b3735e31c9ccdc5d1e053c4ae7f8eae467b6d497",
+      "password_hash": "pbkdf2_sha256$260000$89d4fd24fb525b51e1cfc93e9ed4fca1a0004ee1f1f5810e5a917cbf47e1956a$2d4b1e9091e0a64649a3cf48d4821d81950f270d1fb8a3fef8ef776ec23f57cb",
       "full_name": "Matsapayev Bekzod Dilshod o'g'li",
       "role": "admin",
       "position": "Tizim administratori",
@@ -483,6 +483,15 @@
   ],
   "appeals": [],
   "audit_logs": [
+    {
+      "id": 1795759710784,
+      "event_type": "PASSWORD_CHANGE",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Administrator parolini yangiladi.",
+      "severity": "info",
+      "created_at": 1795759710
+    },
     {
       "id": 1795759291269,
       "event_type": "EVENT_ADD",
