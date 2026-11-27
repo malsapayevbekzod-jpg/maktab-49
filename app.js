@@ -1140,13 +1140,14 @@
     btn.disabled = true;
     btn.textContent = "Tekshirilmoqda...";
     try {
-      const res = await fetch(GH_API_BASE, {
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
-      });
-      if (!res.ok) throw new Error("Token noto'g'ri yoki ruxsati yetarli emas.");
-      const repo = await res.json();
-      if (repo.permissions && repo.permissions.push === false) {
-        throw new Error("Tokenda 'Contents: Read and write' ruxsati yoqilmagan.");
+      const headers = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" };
+      const uRes = await fetch("https://api.github.com/user", { headers });
+      if (!uRes.ok) {
+        throw new Error("Token noto'g'ri yoki muddati o'tgan. Yangi token yaratib qayta urinib ko'ring.");
+      }
+      const rRes = await fetch(`${GH_API_BASE}/contents/data.json?ref=${GH_BRANCH}`, { headers });
+      if (!rRes.ok) {
+        throw new Error("Tokenda maktab-49 repozitoriysiga ruxsat yo'q. Classic token (repo belgilangan) yarating.");
       }
       localStorage.setItem(GH_TOKEN_KEY, token);
       document.getElementById("gh-token-input").value = "";
