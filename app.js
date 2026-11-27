@@ -273,45 +273,122 @@
     return (localStorage.getItem(GH_TOKEN_KEY) || "").trim();
   }
 
-  async function ghUploadFile(repoPath, base64Content, commitMsg) {
+  function formatGhError(status, apiMsg) {
+    if (status === 401) return "GitHub token noto'g'ri yoki muddati tugagan. Yangi token yarating.";
+    if (status === 403 || status === 404) {
+      return "Tokenda maktab-49 ga yozish (repo) ruxsati yo'q! 'Tayyor GitHub Token yaratish' havolasini bosib, 'repo' katagi belgilangan yangi token yarating.";
+    }
+    if (status === 413 || status === 422) {
+      return `Fayl juda katta yoki GitHub rad etdi (${apiMsg || status}). Video 50 MB dan kichik bo'lsin.`;
+    }
+    if (status === 409) return "Bir vaqtda ikkita o'zgarish to'qnashdi. Iltimos, 2 soniyadan keyin qayta bosing.";
+    return `GitHub xatosi (${status}): ${apiMsg || "Internet ulanishini tekshiring."}`;
+  }
+
+  // Bir yoki bir nechta faylni (50 MB gacha video + data.json) BITTA atomar GitHub commit bilan yuklash!
+  async function ghCommitFiles(filesMap, commitMsg) {
     const token = getGitHubToken();
     if (!token) return false;
-    const url = `${GH_API_BASE}/contents/${repoPath}`;
     const headers = {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
       "Content-Type": "application/json",
     };
 
-    // Mavjud fayl SHA sini olish (yangilash uchun kerak)
-    let sha = undefined;
-    try {
-      const getRes = await fetch(`${url}?ref=${GH_BRANCH}`, { headers });
-      if (getRes.ok) {
-        const info = await getRes.json();
-        if (info && info.sha) sha = info.sha;
+    // 1. Joriy main branch HEAD SHA ni keshsiz olish
+    const refRes = await fetch(`${GH_API_BASE}/git/ref/heads/${GH_BRANCH}?_t=${Date.now()}`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!refRes.ok) {
+      const e = await refRes.json().catch(() => ({}));
+      throw new Error(formatGhError(refRes.status, e.message));
+    }
+    const refData = await refRes.json();
+    const headCommitSha = refData.object.sha;
+
+    // 2. Asosiy daraxt (base_tree) SHA ni olish
+    const commitRes = await fetch(`${GH_API_BASE}/git/commits/${headCommitSha}`, {
+      headers,
+      cache: "no-store",
+    });
+    if (!commitRes.ok) {
+      const e = await commitRes.json().catch(() => ({}));
+      throw new Error(formatGhError(commitRes.status, e.message));
+    }
+    const baseTreeSha = (await commitRes.json()).tree.sha;
+
+    // 3. Har bir fayl uchun Git Blob yaratish (50 MB gacha video muammosiz yuklanadi!)
+    const treeEntries = [];
+    for (const [repoPath, base64Content] of Object.entries(filesMap)) {
+      const blobRes = await fetch(`${GH_API_BASE}/git/blobs`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ content: base64Content, encoding: "base64" }),
+      });
+      if (!blobRes.ok) {
+        const e = await blobRes.json().catch(() => ({}));
+        throw new Error(formatGhError(blobRes.status, e.message));
       }
-    } catch { /* yangi fayl */ }
+      const blobData = await blobRes.json();
+      treeEntries.push({
+        path: repoPath,
+        mode: "100644",
+        type: "blob",
+        sha: blobData.sha,
+      });
+    }
 
-    const payload = { message: commitMsg, content: base64Content, branch: GH_BRANCH };
-    if (sha) payload.sha = sha;
+    // 4. Yangi tree yaratish
+    const treeRes = await fetch(`${GH_API_BASE}/git/trees`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ base_tree: baseTreeSha, tree: treeEntries }),
+    });
+    if (!treeRes.ok) {
+      const e = await treeRes.json().catch(() => ({}));
+      throw new Error(formatGhError(treeRes.status, e.message));
+    }
+    const newTreeSha = (await treeRes.json()).sha;
 
-    const putRes = await fetch(url, { method: "PUT", headers, body: JSON.stringify(payload) });
-    if (!putRes.ok) {
-      const errData = await putRes.json().catch(() => ({}));
-      throw new Error(errData.message || `GitHub yuklash xatosi (${putRes.status})`);
+    // 5. Yangi commit yaratish
+    const newCommitRes = await fetch(`${GH_API_BASE}/git/commits`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        message: commitMsg,
+        tree: newTreeSha,
+        parents: [headCommitSha],
+      }),
+    });
+    if (!newCommitRes.ok) {
+      const e = await newCommitRes.json().catch(() => ({}));
+      throw new Error(formatGhError(newCommitRes.status, e.message));
+    }
+    const newCommitSha = (await newCommitRes.json()).sha;
+
+    // 6. main branch ni yangi commitga yo'naltirish
+    const patchRes = await fetch(`${GH_API_BASE}/git/refs/heads/${GH_BRANCH}`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ sha: newCommitSha, force: false }),
+    });
+    if (!patchRes.ok) {
+      const e = await patchRes.json().catch(() => ({}));
+      throw new Error(formatGhError(patchRes.status, e.message));
     }
     return true;
   }
 
-  async function syncStoreToGitHub(store, commitMsg = "Update Maktab 49 site data") {
+  async function syncStoreToGitHub(store, commitMsg = "Update Maktab 49 site data", extraFiles = {}) {
     if (!useStaticMode) return false;
     const token = getGitHubToken();
     if (!token) return false;
     store.updated_at = Math.floor(Date.now() / 1000);
     saveLocalStore(store);
     const jsonStr = JSON.stringify(store, null, 2);
-    await ghUploadFile("data.json", utf8ToBase64(jsonStr), commitMsg);
+    const filesMap = Object.assign({}, extraFiles, { "data.json": utf8ToBase64(jsonStr) });
+    await ghCommitFiles(filesMap, commitMsg);
     showToast("Barcha qurilmalarga saqlandi ✓", "success");
     return true;
   }
@@ -1141,11 +1218,16 @@
     btn.textContent = "Tekshirilmoqda...";
     try {
       const headers = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" };
-      const uRes = await fetch("https://api.github.com/user", { headers });
+      const uRes = await fetch("https://api.github.com/user", { headers, cache: "no-store" });
       if (!uRes.ok) {
         throw new Error("Token noto'g'ri yoki muddati o'tgan. Yangi token yaratib qayta urinib ko'ring.");
       }
-      const rRes = await fetch(`${GH_API_BASE}/contents/data.json?ref=${GH_BRANCH}`, { headers });
+      // Classic token (ghp_...) uchun 'repo' yozish ruxsati borligini aniq tekshirish!
+      const scopes = (uRes.headers.get("x-oauth-scopes") || "").toLowerCase();
+      if (token.startsWith("ghp_") && !scopes.includes("repo")) {
+        throw new Error("Bu Classic tokenda 'repo' katagi belgilanmagan! Yuqoridagi 'Tayyor GitHub Token yaratish' havolasidan 'repo' belgilangan yangi token yarating.");
+      }
+      const rRes = await fetch(`${GH_API_BASE}/contents/data.json?ref=${GH_BRANCH}&_t=${Date.now()}`, { headers, cache: "no-store" });
       if (!rRes.ok) {
         throw new Error("Tokenda maktab-49 repozitoriysiga ruxsat yo'q. Classic token (repo belgilangan) yarating.");
       }
@@ -1183,15 +1265,17 @@
     btn.textContent = "Yuklanmoqda...";
     try {
       const store = loadLocalStore();
-      // Avval shu qurilmada IndexedDB ga saqlanib qolgan media fayllarni ham GitHub uploads/ ga ko'chirish!
+      const extraFiles = {};
       for (const ev of store.events) {
         if (typeof ev.media_path === "string" && ev.media_path.startsWith("idb://")) {
           const blob = await getRawBlobFromIDB(ev.media_path.slice(6));
           if (blob) {
+            if (blob.size > 50 * 1024 * 1024) {
+              throw new Error(`"${ev.title}" videosi 50 MB dan katta (${(blob.size / 1048576).toFixed(1)} MB). Kichikroq video yuklang.`);
+            }
             const ext = ev.media_type === "video" ? "mp4" : "jpg";
             const repoPath = `uploads/ev_${ev.id}.${ext}`;
-            const b64 = await fileToBase64Content(blob);
-            await ghUploadFile(repoPath, b64, `Upload event media ${repoPath}`);
+            extraFiles[repoPath] = await fileToBase64Content(blob);
             ev.media_path = repoPath;
           }
         }
@@ -1201,13 +1285,12 @@
           const blob = await getRawBlobFromIDB(g.image_path.slice(6));
           if (blob) {
             const repoPath = `uploads/gal_${g.id}.jpg`;
-            const b64 = await fileToBase64Content(blob);
-            await ghUploadFile(repoPath, b64, `Upload gallery photo ${repoPath}`);
+            extraFiles[repoPath] = await fileToBase64Content(blob);
             g.image_path = repoPath;
           }
         }
       }
-      await syncStoreToGitHub(store, "Sync all Maktab 49 changes to all devices");
+      await syncStoreToGitHub(store, "Sync all Maktab 49 changes and media to all devices", extraFiles);
       fb.textContent = "Barcha lokal o'zgarishlar, rasmlar va videolar GitHub'ga yuklandi! Endi hamma qurilmalarda ko'rinadi.";
       fb.className = "alert-box alert-success";
       await loadDashboardData();
@@ -1790,11 +1873,11 @@
       if (useStaticMode) {
         const id = Date.now();
         let savedPath = "";
+        const extraFiles = {};
         if (getGitHubToken()) {
           const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
           const repoPath = `uploads/gal_${id}.${ext}`;
-          const b64 = await fileToBase64Content(file);
-          await ghUploadFile(repoPath, b64, `Upload classroom photo: ${title}`);
+          extraFiles[repoPath] = await fileToBase64Content(file);
           savedPath = repoPath;
         } else {
           const key = `gal_${id}`;
@@ -1804,8 +1887,11 @@
         const store = loadLocalStore();
         store.gallery.push({ id, title, category, description, image_path: savedPath });
         addAudit(store, "GALLERY_ADD", state.user.username, `Yangi sinf/maktab rasmi: ${title}`, "info");
-        saveLocalStore(store);
-        if (getGitHubToken()) await syncStoreToGitHub(store, `Add gallery photo: ${title}`);
+        if (getGitHubToken()) {
+          await syncStoreToGitHub(store, `Add gallery photo: ${title}`, extraFiles);
+        } else {
+          saveLocalStore(store);
+        }
         state.gallery = store.gallery;
       } else {
         const dataUrl = await fileToDataUrl(file);
@@ -1867,26 +1953,31 @@
     const file = document.getElementById("ev-file").files[0];
 
     if (!file) { errEl.textContent = "Iltimos, faylni tanlang."; errEl.classList.remove("hidden"); return; }
-    if (mediaType === "photo" && !file.type.startsWith("image/")) { errEl.textContent = "Faqat rasm faylini (JPG, PNG, WEBP) yuklang."; errEl.classList.remove("hidden"); return; }
-    if (mediaType === "video" && !file.type.startsWith("video/")) { errEl.textContent = "Faqat video faylini (MP4, WEBM) yuklang."; errEl.classList.remove("hidden"); return; }
-    if (useStaticMode && getGitHubToken() && file.size > 24 * 1024 * 1024) {
-      errEl.textContent = "GitHub orqali barcha qurilmalarga yuklash uchun video hajmi 24 MB dan kichik bo'lishi kerak.";
+    const lowerName = (file.name || "").toLowerCase();
+    const isPhotoFile = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif)$/.test(lowerName);
+    const isVideoFile = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v)$/.test(lowerName);
+    if (mediaType === "photo" && !isPhotoFile) { errEl.textContent = "Faqat rasm faylini (JPG, PNG, WEBP) yuklang."; errEl.classList.remove("hidden"); return; }
+    if (mediaType === "video" && !isVideoFile) { errEl.textContent = "Faqat video faylini (MP4, WEBM, MOV) yuklang."; errEl.classList.remove("hidden"); return; }
+    if (file.size > 50 * 1024 * 1024) {
+      errEl.textContent = `Fayl hajmi juda katta (${(file.size / 1048576).toFixed(1)} MB). 50 MB dan kichik fayl yuklang.`;
       errEl.classList.remove("hidden");
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = getGitHubToken() ? "GitHub'ga yuklanmoqda..." : "Saqlanmoqda...";
+    submitBtn.textContent = getGitHubToken()
+      ? `GitHub'ga yuklanmoqda (${(file.size / 1048576).toFixed(1)} MB)...`
+      : "Saqlanmoqda...";
     try {
       if (useStaticMode) {
         const id = Date.now();
         let savedPath = "";
+        const extraFiles = {};
         if (getGitHubToken()) {
           const defExt = mediaType === "video" ? "mp4" : "jpg";
-          const ext = (file.name.split(".").pop() || defExt).toLowerCase().replace(/[^a-z0-9]/g, "") || defExt;
+          const ext = (lowerName.split(".").pop() || defExt).replace(/[^a-z0-9]/g, "") || defExt;
           const repoPath = `uploads/ev_${id}.${ext}`;
-          const b64 = await fileToBase64Content(file);
-          await ghUploadFile(repoPath, b64, `Upload event ${mediaType}: ${title}`);
+          extraFiles[repoPath] = await fileToBase64Content(file);
           savedPath = repoPath;
         } else {
           const key = `ev_${id}`;
@@ -1905,10 +1996,10 @@
           created_at: Math.floor(Date.now() / 1000),
         });
         addAudit(store, "EVENT_ADD", state.user.username, `Yangi tadbir (${mediaType === "video" ? "video" : "rasm"}): ${title}`, "info");
-        saveLocalStore(store);
         if (getGitHubToken()) {
-          await syncStoreToGitHub(store, `Add event: ${title}`);
+          await syncStoreToGitHub(store, `Add event ${mediaType}: ${title}`, extraFiles);
         } else {
+          saveLocalStore(store);
           showToast("Shu qurilmada saqlandi. Hammaga ko'rinishi uchun GitHub kalitini ulang.", "info");
         }
         state.events = store.events;
