@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updated_at": 1795759932,
+  "updated_at": 1795760035,
   "users": [
     {
       "id": 1,
@@ -25,7 +25,7 @@
     {
       "id": 1795759932182,
       "username": "m.bekzod",
-      "password_hash": "pbkdf2_sha256$260000$9400d28c91e0a81fb532acaa6323009290d04516e98dc3ba7f931600cb5131e8$ea649537a44eea39ed8ce83ad858fd567ef5d6cec0f9beaf355459fcf3bf6d3a",
+      "password_hash": "pbkdf2_sha256$260000$e871561dff39a89ca5cad42c219ccbbdf1b37f9a4de0f9868d47befcb7499df2$a30bb04986190bf2101c19eb3e173ced33ccbbbcb6e44081aefbf65a4b9b6f8b",
       "full_name": "Matsapayev Bekzod",
       "role": "admin",
       "position": "admin",
@@ -493,6 +493,33 @@
   ],
   "appeals": [],
   "audit_logs": [
+    {
+      "id": 1795760035951,
+      "event_type": "PASSWORD_CHANGE",
+      "username": "m.bekzod",
+      "ip_address": "https-client",
+      "details": "Administrator parolini yangiladi.",
+      "severity": "info",
+      "created_at": 1795760035
+    },
+    {
+      "id": 1795759961216,
+      "event_type": "LOGIN_SUCCESS",
+      "username": "m.bekzod",
+      "ip_address": "https-client",
+      "details": "Muvaffaqiyatli kirish (admin).",
+      "severity": "info",
+      "created_at": 1795759961
+    },
+    {
+      "id": 1795759938267,
+      "event_type": "LOGOUT",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Foydalanuvchi tizimdan chiqdi.",
+      "severity": "info",
+      "created_at": 1795759938
+    },
     {
       "id": 1795759932230,
       "event_type": "USER_CREATE",
