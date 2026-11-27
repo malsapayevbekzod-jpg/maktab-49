@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff" />
   <title>Maktab 49 — Ta'lim Platformasi | Ellikqal'a, Soribiy OFY</title>
   <link rel="icon" type="image/svg+xml" href="logo-49.svg" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
 
@@ -53,6 +53,10 @@
 
         <form id="login-form" class="login-card-body" autocomplete="off" novalidate>
           <div id="login-error" class="alert-box alert-error hidden" role="alert"></div>
+          <div id="login-lockout-box" class="lockout-timer-box hidden" role="alert">
+            <div class="lockout-title">4 marta noto'g'ri kiritildi — tizim vaqtincha bloklandi!</div>
+            <div class="lockout-sub">Qayta urinib ko'rishgacha qolgan vaqt: <span id="lockout-countdown" class="countdown-badge">02:00 (120 soniya)</span></div>
+          </div>
 
           <div class="form-row-emaktab">
             <div class="input-group">
@@ -64,6 +68,9 @@
                   type="text"
                   placeholder="Loginingizni kiriting"
                   autocomplete="username"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  spellcheck="false"
                   required
                 />
               </div>
@@ -81,6 +88,9 @@
                   type="password"
                   placeholder="Parolingizni kiriting"
                   autocomplete="current-password"
+                  autocapitalize="none"
+                  autocorrect="off"
+                  spellcheck="false"
                   required
                 />
                 <button type="button" id="toggle-pw-btn" class="pw-eye-btn" aria-label="Parolni ko'rsatish">
@@ -577,6 +587,10 @@
 
         <!-- ========== SAHIFA 6B: TADBIRLAR (RASM VA VIDEO YUKLASH BILAN) ========== -->
         <section id="page-events" class="page-section">
+          <div id="events-cloud-banner" class="cloud-banner admin-only hidden">
+            <span id="events-cloud-status-text">Barcha qurilmalarda ko'rinishi uchun Boshqaruv bo'limida GitHub bulut kalitini bir marta ulang.</span>
+            <button type="button" class="btn-outline-sm" data-goto="security">Sozlash →</button>
+          </div>
           <div class="toolbar-card">
             <div class="filter-bar" id="events-filters" style="margin-bottom:0;">
               <button type="button" class="filter-chip active" data-ev-filter="all">Barchasi</button>
@@ -754,6 +768,31 @@
               <p>Parollar PBKDF2-HMAC-SHA256 (260 000 iteratsiya + 256-bit tasodifiy tuz) bilan shifrlangan. Sessiyalar HttpOnly + SameSite=Strict cookie va CSRF token bilan himoyalangan. Barcha rasmlar va ma'lumotlar autentifikatsiyasiz ochilmaydi.</p>
             </div>
           </div>
+
+          <!-- Barcha qurilmalarga saqlash (GitHub Cloud Sync — FAQAT ADMIN) -->
+          <article class="card superadmin-only hidden" id="github-cloud-card" style="margin-bottom: 20px;">
+            <div class="card-head">
+              <h3>Barcha qurilmalarga saqlash (GitHub Cloud)</h3>
+              <span id="gh-sync-status-badge" class="count-badge">Tekshirilmoqda...</span>
+            </div>
+            <p class="muted-note" style="margin-bottom: 14px;">
+              Admin yuklagan video, rasm va barcha o'zgarishlar <strong>boshqa telefon va kompyuterlarda ham darhol ko'rinishi</strong> uchun GitHub kalitini (Personal Access Token) bir marta ulang. Kalit faqat sizning brauzeringizda saqlanadi.
+              <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" style="font-weight:700;text-decoration:underline;margin-left:4px;">GitHub Token yaratish →</a>
+              (Repository: <code>maktab-49</code>, Permissions → Contents: <strong>Read and write</strong>).
+            </p>
+            <form id="gh-token-form" class="stacked-form">
+              <div id="gh-token-feedback" class="alert-box hidden"></div>
+              <div class="field">
+                <label for="gh-token-input">GitHub Token (github_pat_... yoki ghp_...)</label>
+                <input id="gh-token-input" type="password" autocomplete="off" placeholder="GitHub tokeningizni bu yerga joylang..." />
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="submit" id="gh-connect-btn" class="btn-primary">Sinash va Ulash</button>
+                <button type="button" id="gh-push-now-btn" class="btn-outline-sm" style="height:42px;">Hozir barcha o'zgarishlarni yuklash</button>
+                <button type="button" id="gh-disconnect-btn" class="btn-danger-sm" style="height:42px;">Uzish</button>
+              </div>
+            </form>
+          </article>
 
           <div class="two-col-grid">
             <!-- Parolni o'zgartirish (FAQAT TIZIM ADMINISTRATORIGA KO'RINADI!) -->
@@ -1108,6 +1147,8 @@
     <button type="button" id="lb-next" class="lb-btn lb-next" aria-label="Keyingi rasm">&#10095;</button>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <div id="global-toast" class="global-toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="app.js?v=4"></script>
 </body>
 </html>

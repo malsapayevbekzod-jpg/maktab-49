@@ -1,0 +1,164 @@
+{
+  "version": 4,
+  "updated_at": 1795667400,
+  "users": [
+    {
+      "id": 1,
+      "username": "admin49",
+      "password_hash": "pbkdf2_sha256$260000$a0db61dddd4078117d094889f529494c775b9fc8dd3f81c19f9bc7b0bac0c192$acbfca0048c8476a6c6542b2b3735e31c9ccdc5d1e053c4ae7f8eae467b6d497",
+      "full_name": "Matsapayev Bekzod Dilshod o'g'li",
+      "role": "admin",
+      "position": "Tizim administratori",
+      "is_active": 1,
+      "created_at": 1795667400
+    },
+    {
+      "id": 2,
+      "username": "direktor49",
+      "password_hash": "pbkdf2_sha256$260000$ec227df2fc878c30c74fe418ffb4152cc8505bad16a6136915b6cb3d0140c3b3$55703d3178f9eabdb52378cbdd079e5cae9a59cbbdc7ad04c397a51d785999dc",
+      "full_name": "Alimov Elyor Kuriyaz o'g'li",
+      "role": "director",
+      "position": "Maktab direktori",
+      "is_active": 1,
+      "created_at": 1795667400
+    }
+  ],
+  "school": {
+    "school_number": "49",
+    "school_name": "49-sonli umumiy o'rta ta'lim maktabi",
+    "platform_name": "Maktab 49 Ta'lim Platformasi",
+    "region": "Qoraqalpog'iston Respublikasi",
+    "district": "Ellikqal'a tumani",
+    "community": "Soribiy OFY",
+    "full_address": "Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY",
+    "location_detail": "Qoraqalpog'iston Respublikasi, Ellikqal'a tumani, Soribiy OFY (Barhayot MFY, Xabarchi ko'chasi, 305-uy)",
+    "location_lat": "41.572770",
+    "location_lng": "60.890981",
+    "founded_date": "01/09/1988",
+    "total_teachers": "43",
+    "deputy_directors": "2",
+    "total_students": "473",
+    "phone_1": "+998 88 654 30 06",
+    "phone_2": "+998 77 312 84 85",
+    "admin_name": "Matsapayev Bekzod Dilshod o'g'li"
+  },
+  "leadership": [
+    {
+      "id": 1,
+      "full_name": "Alimov Elyor Kuriyaz o'g'li",
+      "position": "Maktab direktori",
+      "category": "Direktor",
+      "phone": "+998 88 654 30 06",
+      "bio": "49-sonli umumiy o'rta ta'lim maktabining umumiy boshqaruvi, ta'lim sifati va rivojlanish strategiyasiga mas'ul."
+    },
+    {
+      "id": 2,
+      "full_name": "Matniyazov Muzaffar Ayitovich",
+      "position": "Direktor o'rinbosari",
+      "category": "Direktor o'rinbosari",
+      "phone": "+998 88 654 30 06",
+      "bio": "O'quv-tarbiya jarayonini tashkil etish, dars jadvali va pedagogik faoliyatni muvofiqlashtirish bo'yicha mas'ul."
+    },
+    {
+      "id": 3,
+      "full_name": "Abduraimov G'ayrat Tajiboy o'g'li",
+      "position": "Direktor o'rinbosari",
+      "category": "Direktor o'rinbosari",
+      "phone": "+998 77 312 84 85",
+      "bio": "Ma'naviy-ma'rifiy ishlar, o'quvchilar intizomi va maktab jamoasini qo'llab-quvvatlash bo'yicha mas'ul."
+    },
+    {
+      "id": 4,
+      "full_name": "Atadjanov Ikram Xakimovich",
+      "position": "Boshqaruv xodimi",
+      "category": "Boshqaruv xodimi",
+      "phone": "+998 77 312 84 85",
+      "bio": "Maktabning ma'muriy-xo'jalik va tashkiliy boshqaruv jarayonlariga mas'ul xodim."
+    },
+    {
+      "id": 5,
+      "full_name": "Matsapayev Bekzod Dilshod o'g'li",
+      "position": "Tizim administratori",
+      "category": "Axborot xavfsizligi va IT",
+      "phone": "+998 88 654 30 06 / +998 77 312 84 85",
+      "bio": "Maktab 49 ta'lim platformasining texnik barqarorligi, ma'lumotlar xavfsizligi va foydalanuvchi murojaatlariga mas'ul."
+    }
+  ],
+  "teachers": [
+    { "id": 1, "full_name": "Allabergenova Nasiba Ismoilovna", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 2, "full_name": "Amatov Jamoladdin Mirza o'g'li", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 3, "full_name": "Ayitbayeva Fazilat Reyimbayevna", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 4, "full_name": "Ayitov Javlonbek Muzaffar o'g'li", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 5, "full_name": "Bobadjanova Olmaxon Ruslanbek qizi", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 6, "full_name": "Doshanov Nurgali Muratovich", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 7, "full_name": "Guzenbayeva Miyirxon Kamoladdin qizi", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
+    { "id": 8, "full_name": "Halillayeva Hosiyat Baxtiyorovna", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 }
+  ],
+  "gallery": [
+    { "id": 1, "title": "Maktab old tomon ko'rinishi", "category": "Old ko'rinish", "description": "49-sonli umumiy o'rta ta'lim maktabining asosiy kirish qismi — o'zbek, qoraqalpoq va ingliz tillarida qutlov peshtaxtasi.", "image_path": "entrance.jpg" },
+    { "id": 2, "title": "Maktab binosi va hovlisi", "category": "Old ko'rinish", "description": "Soribiy OFY hududida joylashgan 49-maktabning old fasadi, ko'kalamzorlashtirilgan hovlisi va yorug' derazalari.", "image_path": "yard.jpg" },
+    { "id": 3, "title": "Zamonaviy o'quv sinf xonasi", "category": "Sinf xonalari", "description": "Yangi parta va stullar, o'quv ko'rgazmali qurollari hamda keng doska bilan jihozlangan yorug' sinf xonasi.", "image_path": "classroom.jpg" },
+    { "id": 4, "title": "Maktab axborot-kutubxona markazi", "category": "Kutubxona", "description": "\"Eng yaxshi kitobxon\" va \"Uchinchi Renessansga mening hissam\" burchaklariga ega boy kitob fondli o'quv zali.", "image_path": "library.jpg" },
+    { "id": 5, "title": "Maktab asosiy foyesi", "category": "Ichki ko'rinish", "description": "\"Yangi O'zbekiston — maktab ostonasidan boshlanadi\" shiori, dars jadvali va axborot ekraniga ega markaziy foye.", "image_path": "hall_main.jpg" },
+    { "id": 6, "title": "Davlat ramzlari va e'lonlar burchagi", "category": "Ichki ko'rinish", "description": "O'zbekiston va Qoraqalpog'iston davlat ramzlari, buyruqlar, e'lonlar va yurist maslahati stendlari.", "image_path": "hall_board.jpg" },
+    { "id": 7, "title": "O'quv binosi yo'lagi", "category": "Ichki ko'rinish", "description": "Milliy uyg'onish davri ma'rifatparvarlari portretlari bilan bezatilgan toza va keng maktab yo'lagi.", "image_path": "corridor.jpg" }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "title": "O'quvchilar tadbiri",
+      "media_type": "video",
+      "event_date": "2026-11-25",
+      "description": "49-sonli umumiy o'rta ta'lim maktabi o'quvchilari hayotidan videolavha.",
+      "media_path": "oquvchilar.mp4",
+      "poster_path": "entrance.jpg",
+      "created_at": 1795667400
+    }
+  ],
+  "schedule": [
+    { "id": 1, "class_name": "10-A", "day_of_week": 1, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Kelajak soati" },
+    { "id": 2, "class_name": "10-A", "day_of_week": 1, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Adabiyot" },
+    { "id": 3, "class_name": "10-A", "day_of_week": 1, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Rus tili" },
+    { "id": 4, "class_name": "10-A", "day_of_week": 1, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Algebra" },
+    { "id": 5, "class_name": "10-A", "day_of_week": 1, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Geografiya" },
+    { "id": 6, "class_name": "10-A", "day_of_week": 2, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "O'zbekiston tarixi" },
+    { "id": 7, "class_name": "10-A", "day_of_week": 2, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Fizika" },
+    { "id": 8, "class_name": "10-A", "day_of_week": 2, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Huquq" },
+    { "id": 9, "class_name": "10-A", "day_of_week": 2, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Biologiya" },
+    { "id": 10, "class_name": "10-A", "day_of_week": 2, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Jismoniy tarbiya" },
+    { "id": 11, "class_name": "10-A", "day_of_week": 2, "lesson_number": 6, "time_range": "12:40 - 13:25", "subject": "Algebra" },
+    { "id": 12, "class_name": "10-A", "day_of_week": 3, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Ingliz tili" },
+    { "id": 13, "class_name": "10-A", "day_of_week": 3, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Tarbiya" },
+    { "id": 14, "class_name": "10-A", "day_of_week": 3, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Informatika" },
+    { "id": 15, "class_name": "10-A", "day_of_week": 3, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Ona tili" },
+    { "id": 16, "class_name": "10-A", "day_of_week": 3, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "ChQBT" },
+    { "id": 17, "class_name": "10-A", "day_of_week": 4, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Adabiyot" },
+    { "id": 18, "class_name": "10-A", "day_of_week": 4, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Geografiya" },
+    { "id": 19, "class_name": "10-A", "day_of_week": 4, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Qoraqalpoq tili" },
+    { "id": 20, "class_name": "10-A", "day_of_week": 4, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "ChQBT" },
+    { "id": 21, "class_name": "10-A", "day_of_week": 4, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Kimyo" },
+    { "id": 22, "class_name": "10-A", "day_of_week": 4, "lesson_number": 6, "time_range": "12:40 - 13:25", "subject": "Fizika" },
+    { "id": 23, "class_name": "10-A", "day_of_week": 5, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Jismoniy tarbiya" },
+    { "id": 24, "class_name": "10-A", "day_of_week": 5, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Algebra" },
+    { "id": 25, "class_name": "10-A", "day_of_week": 5, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Informatika" },
+    { "id": 26, "class_name": "10-A", "day_of_week": 5, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Kimyo" },
+    { "id": 27, "class_name": "10-A", "day_of_week": 5, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Geometriya" },
+    { "id": 28, "class_name": "10-A", "day_of_week": 6, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Qoraqalpoq tarixi" },
+    { "id": 29, "class_name": "10-A", "day_of_week": 6, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Rus tili" },
+    { "id": 30, "class_name": "10-A", "day_of_week": 6, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Geometriya" },
+    { "id": 31, "class_name": "10-A", "day_of_week": 6, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Ingliz tili" },
+    { "id": 32, "class_name": "10-A", "day_of_week": 6, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Biologiya" }
+  ],
+  "appeals": [],
+  "audit_logs": [
+    {
+      "id": 1,
+      "event_type": "SYSTEM_INIT",
+      "username": "system",
+      "ip_address": "github-cloud",
+      "details": "Maktab 49 umumiy bulut bazasi (data.json) ishga tushirildi.",
+      "severity": "info",
+      "created_at": 1795667400
+    }
+  ]
+}
