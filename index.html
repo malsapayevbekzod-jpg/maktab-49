@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff" />
   <title>Maktab 49 — Ta'lim Platformasi | Ellikqal'a, Soribiy OFY</title>
   <link rel="icon" type="image/svg+xml" href="logo-49.svg" />
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=8" />
 </head>
 <body>
 
@@ -795,27 +795,31 @@
           </article>
 
           <div class="two-col-grid">
-            <!-- Parolni o'zgartirish (FAQAT TIZIM ADMINISTRATORIGA KO'RINADI!) -->
+            <!-- Login va parolni o'zgartirish (FAQAT TIZIM ADMINISTRATORIGA KO'RINADI!) -->
             <article class="card superadmin-only hidden" id="admin-password-card">
               <div class="card-head">
-                <h3>Parol o'zgartirish (Faqat Admin)</h3>
+                <h3>Login va parol o'zgartirish (Faqat Admin)</h3>
                 <span class="count-badge">Maxsus himoya</span>
               </div>
               <form id="change-pw-form" class="stacked-form">
                 <div id="pw-feedback" class="alert-box hidden"></div>
                 <div class="field">
-                  <label for="cur-pw">Joriy admin paroli</label>
-                  <input id="cur-pw" type="password" required placeholder="Hozirgi parolni kiriting" />
+                  <label for="cur-pw">Joriy admin paroli (tasdiqlash uchun)</label>
+                  <input id="cur-pw" type="password" required placeholder="Hozirgi parolni kiriting" autocapitalize="none" autocorrect="off" />
                 </div>
                 <div class="field">
-                  <label for="new-pw">Yangi parol (kamida 8 belgi, katta/kichik harf va raqam)</label>
-                  <input id="new-pw" type="password" required minlength="8" placeholder="Yangi kuchli parol" />
+                  <label for="new-admin-username">Yangi admin logini</label>
+                  <input id="new-admin-username" type="text" required placeholder="Masalan: admin49 yoki bekzod49" autocapitalize="none" autocorrect="off" spellcheck="false" />
+                </div>
+                <div class="field">
+                  <label for="new-pw">Yangi parol (kamida 8 belgi, katta/kichik harf va raqam; o'zgartirmasangiz bo'sh qoldiring)</label>
+                  <input id="new-pw" type="password" minlength="8" placeholder="Yangi kuchli parol" autocapitalize="none" autocorrect="off" />
                 </div>
                 <div class="field">
                   <label for="confirm-pw">Yangi parolni tasdiqlang</label>
-                  <input id="confirm-pw" type="password" required minlength="8" placeholder="Yangi parolni qayta kiriting" />
+                  <input id="confirm-pw" type="password" minlength="8" placeholder="Yangi parolni qayta kiriting" autocapitalize="none" autocorrect="off" />
                 </div>
-                <button type="submit" class="btn-primary">Admin parolini yangilash</button>
+                <button type="submit" id="save-admin-creds-btn" class="btn-primary">Admin login va parolini yangilash</button>
               </form>
 
               <hr style="border:none;border-top:1px solid var(--border);margin:20px 0;" />
@@ -1149,6 +1153,6 @@
 
   <div id="global-toast" class="global-toast hidden" role="status" aria-live="polite"></div>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

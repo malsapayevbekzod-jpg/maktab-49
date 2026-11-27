@@ -318,7 +318,17 @@
     return `GitHub xatosi (${status}): ${apiMsg || "Internet ulanishini tekshiring."}`;
   }
 
+  function base64ToUtf8(b64) {
+    const clean = String(b64 || "").replace(/\s+/g, "");
+    const bin = atob(clean);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    if (typeof TextDecoder !== "undefined") return new TextDecoder("utf-8").decode(bytes);
+    return decodeURIComponent(escape(bin));
+  }
+
   // Bir yoki bir nechta faylni (50 MB gacha video + data.json) BITTA atomar GitHub commit bilan yuklash!
+  // "Update is not a fast forward" (422/409) bo'lsa avtomatik eng so'nggi HEAD bilan qayta urinadi!
   async function ghCommitFiles(filesMap, commitMsg) {
     const token = getGitHubToken();
     if (!token) return false;
@@ -328,30 +338,7 @@
       "Content-Type": "application/json",
     };
 
-    // 1. Joriy main branch HEAD SHA ni keshsiz olish
-    const refRes = await fetch(`${GH_API_BASE}/git/ref/heads/${GH_BRANCH}?_t=${Date.now()}`, {
-      headers,
-      cache: "no-store",
-    });
-    if (!refRes.ok) {
-      const e = await refRes.json().catch(() => ({}));
-      throw new Error(formatGhError(refRes.status, e.message));
-    }
-    const refData = await refRes.json();
-    const headCommitSha = refData.object.sha;
-
-    // 2. Asosiy daraxt (base_tree) SHA ni olish
-    const commitRes = await fetch(`${GH_API_BASE}/git/commits/${headCommitSha}`, {
-      headers,
-      cache: "no-store",
-    });
-    if (!commitRes.ok) {
-      const e = await commitRes.json().catch(() => ({}));
-      throw new Error(formatGhError(commitRes.status, e.message));
-    }
-    const baseTreeSha = (await commitRes.json()).tree.sha;
-
-    // 3. Har bir fayl uchun Git Blob yaratish (50 MB gacha video muammosiz yuklanadi!)
+    // 1. Har bir fayl uchun Git Blob yaratish (faqat 1 marta yuklanadi, 50 MB gacha!)
     const treeEntries = [];
     for (const [repoPath, base64Content] of Object.entries(filesMap)) {
       const blobRes = await fetch(`${GH_API_BASE}/git/blobs`, {
@@ -372,44 +359,66 @@
       });
     }
 
-    // 4. Yangi tree yaratish
-    const treeRes = await fetch(`${GH_API_BASE}/git/trees`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ base_tree: baseTreeSha, tree: treeEntries }),
-    });
-    if (!treeRes.ok) {
-      const e = await treeRes.json().catch(() => ({}));
-      throw new Error(formatGhError(treeRes.status, e.message));
-    }
-    const newTreeSha = (await treeRes.json()).sha;
+    // 2. Eng so'nggi main HEAD ustiga atomar commit (3 martagacha auto-retry!)
+    let lastErr = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const commitsRes = await fetch(`${GH_API_BASE}/commits?sha=${GH_BRANCH}&per_page=1&_t=${Date.now()}`, {
+        headers,
+        cache: "no-store",
+      });
+      if (!commitsRes.ok) {
+        const e = await commitsRes.json().catch(() => ({}));
+        throw new Error(formatGhError(commitsRes.status, e.message));
+      }
+      const commitsList = await commitsRes.json();
+      if (!Array.isArray(commitsList) || !commitsList.length) {
+        throw new Error("GitHub main branch commitlari topilmadi.");
+      }
+      const headCommitSha = commitsList[0].sha;
+      const baseTreeSha = commitsList[0].commit.tree.sha;
 
-    // 5. Yangi commit yaratish
-    const newCommitRes = await fetch(`${GH_API_BASE}/git/commits`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        message: commitMsg,
-        tree: newTreeSha,
-        parents: [headCommitSha],
-      }),
-    });
-    if (!newCommitRes.ok) {
-      const e = await newCommitRes.json().catch(() => ({}));
-      throw new Error(formatGhError(newCommitRes.status, e.message));
-    }
-    const newCommitSha = (await newCommitRes.json()).sha;
+      const treeRes = await fetch(`${GH_API_BASE}/git/trees`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ base_tree: baseTreeSha, tree: treeEntries }),
+      });
+      if (!treeRes.ok) {
+        const e = await treeRes.json().catch(() => ({}));
+        throw new Error(formatGhError(treeRes.status, e.message));
+      }
+      const newTreeSha = (await treeRes.json()).sha;
 
-    // 6. main branch ni yangi commitga yo'naltirish
-    const patchRes = await fetch(`${GH_API_BASE}/git/refs/heads/${GH_BRANCH}`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ sha: newCommitSha, force: false }),
-    });
-    if (!patchRes.ok) {
-      const e = await patchRes.json().catch(() => ({}));
-      throw new Error(formatGhError(patchRes.status, e.message));
+      const newCommitRes = await fetch(`${GH_API_BASE}/git/commits`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          message: commitMsg,
+          tree: newTreeSha,
+          parents: [headCommitSha],
+        }),
+      });
+      if (!newCommitRes.ok) {
+        const e = await newCommitRes.json().catch(() => ({}));
+        throw new Error(formatGhError(newCommitRes.status, e.message));
+      }
+      const newCommitSha = (await newCommitRes.json()).sha;
+
+      const patchRes = await fetch(`${GH_API_BASE}/git/refs/heads/${GH_BRANCH}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ sha: newCommitSha, force: false }),
+      });
+      if (patchRes.ok) return true;
+
+      const patchErr = await patchRes.json().catch(() => ({}));
+      if ((patchRes.status === 422 || patchRes.status === 409) && attempt < 2) {
+        lastErr = new Error(formatGhError(patchRes.status, patchErr.message));
+        await new Promise((r) => setTimeout(r, 600));
+        continue;
+      }
+      throw new Error(formatGhError(patchRes.status, patchErr.message));
     }
+    if (lastErr) throw lastErr;
     return true;
   }
 
@@ -427,6 +436,28 @@
   }
 
   async function fetchCloudDataOnLoad() {
+    // 1) Avval 0-soniyali yangi GitHub API contents/data.json (login/parol o'zgarsa darhol boshqa qurilmalarga o'tadi!)
+    try {
+      const token = getGitHubToken();
+      const headers = { Accept: "application/vnd.github+json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      const apiRes = await fetch(`${GH_API_BASE}/contents/data.json?ref=${GH_BRANCH}&_t=${Date.now()}`, {
+        headers,
+        cache: "no-store",
+      });
+      if (apiRes.ok) {
+        const meta = await apiRes.json();
+        if (meta && meta.content) {
+          const remote = JSON.parse(base64ToUtf8(meta.content));
+          if (remote && remote.school && Array.isArray(remote.users)) {
+            mergeRemoteStore(remote);
+            return true;
+          }
+        }
+      }
+    } catch { /* fallback pastda */ }
+
+    // 2) Zaxira: raw.githubusercontent.com va lokal data.json
     const urls = [
       `${GH_RAW_BASE}/data.json?t=${Date.now()}`,
       `data.json?t=${Date.now()}`,
@@ -437,20 +468,22 @@
         if (!res.ok) continue;
         const remote = await res.json();
         if (remote && remote.school && Array.isArray(remote.users)) {
-          const local = loadLocalStoreRaw();
-          // Agar bulutdagi data yangiroq bo'lsa yoki lokalda hali yo'q bo'lsa -> yangilash!
-          if (!local || (remote.updated_at || 0) >= (local.updated_at || 0)) {
-            saveLocalStore(remote);
-          } else {
-            // Har doim eng so'nggi remote users / events / gallery bilan birlashtirish
-            local.users = remote.users;
-            saveLocalStore(local);
-          }
+          mergeRemoteStore(remote);
           return true;
         }
       } catch { /* keyingi manzilga o'tish */ }
     }
     return false;
+  }
+
+  function mergeRemoteStore(remote) {
+    const local = loadLocalStoreRaw();
+    if (!local || (remote.updated_at || 0) >= (local.updated_at || 0)) {
+      saveLocalStore(remote);
+    } else {
+      local.users = remote.users;
+      saveLocalStore(local);
+    }
   }
 
   // ==================== 3. STATIK STORE VA 4-URINISH / 120s BLOKLASH ====================
@@ -757,6 +790,10 @@
     }
 
     if (url === "/api/auth/login" && method === "POST") {
+      // Kirishdan oldin eng so'nggi login/parolni bulutdan (GitHub) darhol tortib olish!
+      await fetchCloudDataOnLoad();
+      const freshStore = loadLocalStore();
+
       const username = String(body.username || "").trim();
       const password = String(body.password || "");
       const lockSt = getLockoutState();
@@ -767,7 +804,7 @@
         throw err;
       }
 
-      const user = store.users.find((u) => u.username.toLowerCase() === username.toLowerCase() && u.is_active);
+      const user = freshStore.users.find((u) => u.username.toLowerCase() === username.toLowerCase() && u.is_active);
       const valid = user ? await verifyPasswordWeb(password, user.password_hash) : false;
 
       if (!user || !valid) {
@@ -775,21 +812,21 @@
         const remaining = Math.max(MAX_ATTEMPTS - nextCount, 0);
         if (remaining === 0) {
           setLockoutState({ count: MAX_ATTEMPTS, lockUntil: Date.now() + LOCKOUT_SECONDS * 1000 });
-          addAudit(store, "LOGIN_LOCKED", username || "noma'lum", `4 ta xato urinish tufayli ${LOCKOUT_SECONDS} soniyaga bloklandi.`, "danger");
-          saveLocalStore(store);
+          addAudit(freshStore, "LOGIN_LOCKED", username || "noma'lum", `4 ta xato urinish tufayli ${LOCKOUT_SECONDS} soniyaga bloklandi.`, "danger");
+          saveLocalStore(freshStore);
           const err = new Error(`4 marta noto'g'ri kiritildi. ${LOCKOUT_SECONDS} soniya kuting.`);
           err.retryAfter = LOCKOUT_SECONDS;
           throw err;
         }
         setLockoutState({ count: nextCount, lockUntil: 0 });
-        addAudit(store, "LOGIN_FAILED", username || "noma'lum", `Noto'g'ri login yoki parol (qolgan: ${remaining}).`, "warning");
-        saveLocalStore(store);
+        addAudit(freshStore, "LOGIN_FAILED", username || "noma'lum", `Noto'g'ri login yoki parol (qolgan: ${remaining}).`, "warning");
+        saveLocalStore(freshStore);
         throw new Error(`Login yoki parol noto'g'ri. Qolgan urinishlar soni: ${remaining}.`);
       }
 
       if (user.role !== "admin" && user.role !== "director") {
-        addAudit(store, "LOGIN_DENIED", user.username, "Faqat admin va direktor kirishi mumkin.", "warning");
-        saveLocalStore(store);
+        addAudit(freshStore, "LOGIN_DENIED", user.username, "Faqat admin va direktor kirishi mumkin.", "warning");
+        saveLocalStore(freshStore);
         throw new Error("Tizimga kirish faqat Tizim administratori va Maktab direktori uchun!");
       }
 
@@ -797,8 +834,8 @@
       const pubUser = { id: user.id, username: user.username, full_name: user.full_name, role: user.role, position: user.position };
       const csrf = bytesToHex(getRandomBytes(16));
       sessionStorage.setItem(SESSION_KEY, JSON.stringify({ user: pubUser, csrf_token: csrf, expires_at: Date.now() + SESSION_TTL_MS }));
-      addAudit(store, "LOGIN_SUCCESS", user.username, `Muvaffaqiyatli kirish (${user.role}).`, "info");
-      saveLocalStore(store);
+      addAudit(freshStore, "LOGIN_SUCCESS", user.username, `Muvaffaqiyatli kirish (${user.role}).`, "info");
+      saveLocalStore(freshStore);
       return { ok: true, csrf_token: csrf, user: pubUser };
     }
 
@@ -847,18 +884,51 @@
     }
 
     if (url === "/api/auth/change-password" && method === "POST") {
-      if (!isAdmin) throw new Error("Parol o'zgartirish bo'limi faqat Tizim administratori uchun!");
+      if (!isAdmin) throw new Error("Login va parol o'zgartirish bo'limi faqat Tizim administratori uchun!");
       const u = store.users.find((x) => x.id === sess.user.id);
       if (!u || !(await verifyPasswordWeb(body.current_password || "", u.password_hash))) {
-        throw new Error("Joriy parol noto'g'ri kiritildi.");
+        throw new Error("Joriy admin paroli noto'g'ri kiritildi.");
       }
-      const pwErr = validatePasswordStrength(body.new_password);
-      if (pwErr) throw new Error(pwErr);
-      u.password_hash = await hashPasswordWeb(body.new_password);
-      addAudit(store, "PASSWORD_CHANGE", u.username, "Administrator parolini yangiladi.", "info");
+
+      const newUsername = String(body.new_username || "").trim();
+      const newPw = String(body.new_password || "");
+      let finalUsername = u.username;
+
+      if (newUsername && newUsername.toLowerCase() !== u.username.toLowerCase()) {
+        if (!/^[a-zA-Z0-9._-]{3,40}$/.test(newUsername)) {
+          throw new Error("Yangi login 3-40 ta belgi (harf, raqam, ., _, -) bo'lishi kerak.");
+        }
+        const clash = store.users.find((x) => x.id !== u.id && x.username.toLowerCase() === newUsername.toLowerCase());
+        if (clash) throw new Error("Bunday login allaqachon mavjud.");
+        finalUsername = newUsername;
+      }
+
+      if (!newPw && finalUsername === u.username) {
+        throw new Error("O'zgartirish uchun yangi login yoki yangi parolni kiriting.");
+      }
+
+      if (newPw) {
+        const pwErr = validatePasswordStrength(newPw);
+        if (pwErr) throw new Error(pwErr);
+        u.password_hash = await hashPasswordWeb(newPw);
+      }
+
+      u.username = finalUsername;
+      // Joriy sessiyadagi loginni ham darhol yangilash
+      sess.user.username = finalUsername;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+
+      addAudit(store, "PASSWORD_CHANGE", finalUsername, `Admin login/parol yangilandi (${finalUsername}).`, "info");
       saveLocalStore(store);
-      await syncStoreToGitHub(store, "Admin password updated");
-      return { ok: true, message: "Admin paroli muvaffaqiyatli va xavfsiz yangilandi!" };
+      const synced = await syncStoreToGitHub(store, `Update admin credentials (${finalUsername})`);
+      const syncMsg = synced
+        ? " Barcha boshqa qurilmalarda ham darhol ishlaydi!"
+        : " (Boshqa qurilmalarda ham ishlashi uchun yuqorida GitHub Tokenni ulang.)";
+      return {
+        ok: true,
+        username: finalUsername,
+        message: `Admin logini (${finalUsername}) va paroli muvaffaqiyatli yangilandi!${syncMsg}`,
+      };
     }
 
     if (url === "/api/admin/reset-password" && method === "POST") {
@@ -1395,6 +1465,10 @@
       document.getElementById("user-avatar").textContent = getInitials(state.user.full_name);
       document.getElementById("user-fullname").textContent = state.user.full_name;
       document.getElementById("user-role-label").textContent = ROLE_LABELS[state.user.role] || state.user.role;
+      const adminUserInput = document.getElementById("new-admin-username");
+      if (adminUserInput && state.user.role === "admin") {
+        adminUserInput.value = state.user.username || "admin49";
+      }
       updateCloudStatusUI();
     }
   }
@@ -2257,18 +2331,36 @@
   document.getElementById("change-pw-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fb = document.getElementById("pw-feedback");
+    const btn = document.getElementById("save-admin-creds-btn");
     fb.className = "alert-box hidden";
     const cur = document.getElementById("cur-pw").value;
+    const newUsername = document.getElementById("new-admin-username")?.value.trim() || "";
     const nw = document.getElementById("new-pw").value;
     const cnf = document.getElementById("confirm-pw").value;
-    if (nw !== cnf) { fb.textContent = "Yangi parol va tasdiqlash paroli bir xil emas."; fb.className = "alert-box alert-error"; return; }
+    if (nw && nw !== cnf) {
+      fb.textContent = "Yangi parol va tasdiqlash paroli bir xil emas.";
+      fb.className = "alert-box alert-error";
+      return;
+    }
+    if (btn) { btn.disabled = true; btn.textContent = "Saqlanmoqda..."; }
     try {
-      const res = await apiFetch("/api/auth/change-password", { method: "POST", body: JSON.stringify({ current_password: cur, new_password: nw }) });
+      const res = await apiFetch("/api/auth/change-password", {
+        method: "POST",
+        body: JSON.stringify({ current_password: cur, new_username: newUsername, new_password: nw }),
+      });
+      if (res.username && state.user) state.user.username = res.username;
       fb.textContent = res.message;
       fb.className = "alert-box alert-success";
-      e.target.reset();
+      document.getElementById("cur-pw").value = "";
+      document.getElementById("new-pw").value = "";
+      document.getElementById("confirm-pw").value = "";
       loadSecurityAudit();
-    } catch (err) { fb.textContent = err.message; fb.className = "alert-box alert-error"; }
+    } catch (err) {
+      fb.textContent = err.message;
+      fb.className = "alert-box alert-error";
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Admin login va parolini yangilash"; }
+    }
   });
 
   document.getElementById("reset-other-pw-form")?.addEventListener("submit", async (e) => {
