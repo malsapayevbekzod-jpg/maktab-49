@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updated_at": 1795667400,
+  "updated_at": 1795759291,
   "users": [
     {
       "id": 1,
@@ -85,25 +85,133 @@
     }
   ],
   "teachers": [
-    { "id": 1, "full_name": "Allabergenova Nasiba Ismoilovna", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 2, "full_name": "Amatov Jamoladdin Mirza o'g'li", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 3, "full_name": "Ayitbayeva Fazilat Reyimbayevna", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 4, "full_name": "Ayitov Javlonbek Muzaffar o'g'li", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 5, "full_name": "Bobadjanova Olmaxon Ruslanbek qizi", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 6, "full_name": "Doshanov Nurgali Muratovich", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 7, "full_name": "Guzenbayeva Miyirxon Kamoladdin qizi", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 },
-    { "id": 8, "full_name": "Halillayeva Hosiyat Baxtiyorovna", "subject": "O'qituvchi", "category": "Pedagog xodim", "phone": "", "experience_years": 0 }
+    {
+      "id": 1,
+      "full_name": "Allabergenova Nasiba Ismoilovna",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 2,
+      "full_name": "Amatov Jamoladdin Mirza o'g'li",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 3,
+      "full_name": "Ayitbayeva Fazilat Reyimbayevna",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 4,
+      "full_name": "Ayitov Javlonbek Muzaffar o'g'li",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 5,
+      "full_name": "Bobadjanova Olmaxon Ruslanbek qizi",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 6,
+      "full_name": "Doshanov Nurgali Muratovich",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 7,
+      "full_name": "Guzenbayeva Miyirxon Kamoladdin qizi",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    },
+    {
+      "id": 8,
+      "full_name": "Halillayeva Hosiyat Baxtiyorovna",
+      "subject": "O'qituvchi",
+      "category": "Pedagog xodim",
+      "phone": "",
+      "experience_years": 0
+    }
   ],
   "gallery": [
-    { "id": 1, "title": "Maktab old tomon ko'rinishi", "category": "Old ko'rinish", "description": "49-sonli umumiy o'rta ta'lim maktabining asosiy kirish qismi — o'zbek, qoraqalpoq va ingliz tillarida qutlov peshtaxtasi.", "image_path": "entrance.jpg" },
-    { "id": 2, "title": "Maktab binosi va hovlisi", "category": "Old ko'rinish", "description": "Soribiy OFY hududida joylashgan 49-maktabning old fasadi, ko'kalamzorlashtirilgan hovlisi va yorug' derazalari.", "image_path": "yard.jpg" },
-    { "id": 3, "title": "Zamonaviy o'quv sinf xonasi", "category": "Sinf xonalari", "description": "Yangi parta va stullar, o'quv ko'rgazmali qurollari hamda keng doska bilan jihozlangan yorug' sinf xonasi.", "image_path": "classroom.jpg" },
-    { "id": 4, "title": "Maktab axborot-kutubxona markazi", "category": "Kutubxona", "description": "\"Eng yaxshi kitobxon\" va \"Uchinchi Renessansga mening hissam\" burchaklariga ega boy kitob fondli o'quv zali.", "image_path": "library.jpg" },
-    { "id": 5, "title": "Maktab asosiy foyesi", "category": "Ichki ko'rinish", "description": "\"Yangi O'zbekiston — maktab ostonasidan boshlanadi\" shiori, dars jadvali va axborot ekraniga ega markaziy foye.", "image_path": "hall_main.jpg" },
-    { "id": 6, "title": "Davlat ramzlari va e'lonlar burchagi", "category": "Ichki ko'rinish", "description": "O'zbekiston va Qoraqalpog'iston davlat ramzlari, buyruqlar, e'lonlar va yurist maslahati stendlari.", "image_path": "hall_board.jpg" },
-    { "id": 7, "title": "O'quv binosi yo'lagi", "category": "Ichki ko'rinish", "description": "Milliy uyg'onish davri ma'rifatparvarlari portretlari bilan bezatilgan toza va keng maktab yo'lagi.", "image_path": "corridor.jpg" }
+    {
+      "id": 1,
+      "title": "Maktab old tomon ko'rinishi",
+      "category": "Old ko'rinish",
+      "description": "49-sonli umumiy o'rta ta'lim maktabining asosiy kirish qismi — o'zbek, qoraqalpoq va ingliz tillarida qutlov peshtaxtasi.",
+      "image_path": "entrance.jpg"
+    },
+    {
+      "id": 2,
+      "title": "Maktab binosi va hovlisi",
+      "category": "Old ko'rinish",
+      "description": "Soribiy OFY hududida joylashgan 49-maktabning old fasadi, ko'kalamzorlashtirilgan hovlisi va yorug' derazalari.",
+      "image_path": "yard.jpg"
+    },
+    {
+      "id": 3,
+      "title": "Zamonaviy o'quv sinf xonasi",
+      "category": "Sinf xonalari",
+      "description": "Yangi parta va stullar, o'quv ko'rgazmali qurollari hamda keng doska bilan jihozlangan yorug' sinf xonasi.",
+      "image_path": "classroom.jpg"
+    },
+    {
+      "id": 4,
+      "title": "Maktab axborot-kutubxona markazi",
+      "category": "Kutubxona",
+      "description": "\"Eng yaxshi kitobxon\" va \"Uchinchi Renessansga mening hissam\" burchaklariga ega boy kitob fondli o'quv zali.",
+      "image_path": "library.jpg"
+    },
+    {
+      "id": 5,
+      "title": "Maktab asosiy foyesi",
+      "category": "Ichki ko'rinish",
+      "description": "\"Yangi O'zbekiston — maktab ostonasidan boshlanadi\" shiori, dars jadvali va axborot ekraniga ega markaziy foye.",
+      "image_path": "hall_main.jpg"
+    },
+    {
+      "id": 6,
+      "title": "Davlat ramzlari va e'lonlar burchagi",
+      "category": "Ichki ko'rinish",
+      "description": "O'zbekiston va Qoraqalpog'iston davlat ramzlari, buyruqlar, e'lonlar va yurist maslahati stendlari.",
+      "image_path": "hall_board.jpg"
+    },
+    {
+      "id": 7,
+      "title": "O'quv binosi yo'lagi",
+      "category": "Ichki ko'rinish",
+      "description": "Milliy uyg'onish davri ma'rifatparvarlari portretlari bilan bezatilgan toza va keng maktab yo'lagi.",
+      "image_path": "corridor.jpg"
+    }
   ],
   "events": [
+    {
+      "id": 1795759291139,
+      "title": "Ustozlar bayramiga bag'ishlangan",
+      "media_type": "video",
+      "event_date": "2026-10-01",
+      "description": "49-sonli maktab ustozlari uchun video lavha",
+      "media_path": "uploads/ev_1795759291139.mp4",
+      "poster_path": "entrance.jpg",
+      "created_at": 1795759291
+    },
     {
       "id": 1,
       "title": "O'quvchilar tadbiri",
@@ -116,41 +224,346 @@
     }
   ],
   "schedule": [
-    { "id": 1, "class_name": "10-A", "day_of_week": 1, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Kelajak soati" },
-    { "id": 2, "class_name": "10-A", "day_of_week": 1, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Adabiyot" },
-    { "id": 3, "class_name": "10-A", "day_of_week": 1, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Rus tili" },
-    { "id": 4, "class_name": "10-A", "day_of_week": 1, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Algebra" },
-    { "id": 5, "class_name": "10-A", "day_of_week": 1, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Geografiya" },
-    { "id": 6, "class_name": "10-A", "day_of_week": 2, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "O'zbekiston tarixi" },
-    { "id": 7, "class_name": "10-A", "day_of_week": 2, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Fizika" },
-    { "id": 8, "class_name": "10-A", "day_of_week": 2, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Huquq" },
-    { "id": 9, "class_name": "10-A", "day_of_week": 2, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Biologiya" },
-    { "id": 10, "class_name": "10-A", "day_of_week": 2, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Jismoniy tarbiya" },
-    { "id": 11, "class_name": "10-A", "day_of_week": 2, "lesson_number": 6, "time_range": "12:40 - 13:25", "subject": "Algebra" },
-    { "id": 12, "class_name": "10-A", "day_of_week": 3, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Ingliz tili" },
-    { "id": 13, "class_name": "10-A", "day_of_week": 3, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Tarbiya" },
-    { "id": 14, "class_name": "10-A", "day_of_week": 3, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Informatika" },
-    { "id": 15, "class_name": "10-A", "day_of_week": 3, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Ona tili" },
-    { "id": 16, "class_name": "10-A", "day_of_week": 3, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "ChQBT" },
-    { "id": 17, "class_name": "10-A", "day_of_week": 4, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Adabiyot" },
-    { "id": 18, "class_name": "10-A", "day_of_week": 4, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Geografiya" },
-    { "id": 19, "class_name": "10-A", "day_of_week": 4, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Qoraqalpoq tili" },
-    { "id": 20, "class_name": "10-A", "day_of_week": 4, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "ChQBT" },
-    { "id": 21, "class_name": "10-A", "day_of_week": 4, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Kimyo" },
-    { "id": 22, "class_name": "10-A", "day_of_week": 4, "lesson_number": 6, "time_range": "12:40 - 13:25", "subject": "Fizika" },
-    { "id": 23, "class_name": "10-A", "day_of_week": 5, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Jismoniy tarbiya" },
-    { "id": 24, "class_name": "10-A", "day_of_week": 5, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Algebra" },
-    { "id": 25, "class_name": "10-A", "day_of_week": 5, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Informatika" },
-    { "id": 26, "class_name": "10-A", "day_of_week": 5, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Kimyo" },
-    { "id": 27, "class_name": "10-A", "day_of_week": 5, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Geometriya" },
-    { "id": 28, "class_name": "10-A", "day_of_week": 6, "lesson_number": 1, "time_range": "08:30 - 09:15", "subject": "Qoraqalpoq tarixi" },
-    { "id": 29, "class_name": "10-A", "day_of_week": 6, "lesson_number": 2, "time_range": "09:20 - 10:05", "subject": "Rus tili" },
-    { "id": 30, "class_name": "10-A", "day_of_week": 6, "lesson_number": 3, "time_range": "10:10 - 10:55", "subject": "Geometriya" },
-    { "id": 31, "class_name": "10-A", "day_of_week": 6, "lesson_number": 4, "time_range": "11:00 - 11:45", "subject": "Ingliz tili" },
-    { "id": 32, "class_name": "10-A", "day_of_week": 6, "lesson_number": 5, "time_range": "11:50 - 12:35", "subject": "Biologiya" }
+    {
+      "id": 1,
+      "class_name": "10-A",
+      "day_of_week": 1,
+      "lesson_number": 1,
+      "time_range": "08:30 - 09:15",
+      "subject": "Kelajak soati"
+    },
+    {
+      "id": 2,
+      "class_name": "10-A",
+      "day_of_week": 1,
+      "lesson_number": 2,
+      "time_range": "09:20 - 10:05",
+      "subject": "Adabiyot"
+    },
+    {
+      "id": 3,
+      "class_name": "10-A",
+      "day_of_week": 1,
+      "lesson_number": 3,
+      "time_range": "10:10 - 10:55",
+      "subject": "Rus tili"
+    },
+    {
+      "id": 4,
+      "class_name": "10-A",
+      "day_of_week": 1,
+      "lesson_number": 4,
+      "time_range": "11:00 - 11:45",
+      "subject": "Algebra"
+    },
+    {
+      "id": 5,
+      "class_name": "10-A",
+      "day_of_week": 1,
+      "lesson_number": 5,
+      "time_range": "11:50 - 12:35",
+      "subject": "Geografiya"
+    },
+    {
+      "id": 6,
+      "class_name": "10-A",
+      "day_of_week": 2,
+      "lesson_number": 1,
+      "time_range": "08:30 - 09:15",
+      "subject": "O'zbekiston tarixi"
+    },
+    {
+      "id": 7,
+      "class_name": "10-A",
+      "day_of_week": 2,
+      "lesson_number": 2,
+      "time_range": "09:20 - 10:05",
+      "subject": "Fizika"
+    },
+    {
+      "id": 8,
+      "class_name": "10-A",
+      "day_of_week": 2,
+      "lesson_number": 3,
+      "time_range": "10:10 - 10:55",
+      "subject": "Huquq"
+    },
+    {
+      "id": 9,
+      "class_name": "10-A",
+      "day_of_week": 2,
+      "lesson_number": 4,
+      "time_range": "11:00 - 11:45",
+      "subject": "Biologiya"
+    },
+    {
+      "id": 10,
+      "class_name": "10-A",
+      "day_of_week": 2,
+      "lesson_number": 5,
+      "time_range": "11:50 - 12:35",
+      "subject": "Jismoniy tarbiya"
+    },
+    {
+      "id": 11,
+      "class_name": "10-A",
+      "day_of_week": 2,
+      "lesson_number": 6,
+      "time_range": "12:40 - 13:25",
+      "subject": "Algebra"
+    },
+    {
+      "id": 12,
+      "class_name": "10-A",
+      "day_of_week": 3,
+      "lesson_number": 1,
+      "time_range": "08:30 - 09:15",
+      "subject": "Ingliz tili"
+    },
+    {
+      "id": 13,
+      "class_name": "10-A",
+      "day_of_week": 3,
+      "lesson_number": 2,
+      "time_range": "09:20 - 10:05",
+      "subject": "Tarbiya"
+    },
+    {
+      "id": 14,
+      "class_name": "10-A",
+      "day_of_week": 3,
+      "lesson_number": 3,
+      "time_range": "10:10 - 10:55",
+      "subject": "Informatika"
+    },
+    {
+      "id": 15,
+      "class_name": "10-A",
+      "day_of_week": 3,
+      "lesson_number": 4,
+      "time_range": "11:00 - 11:45",
+      "subject": "Ona tili"
+    },
+    {
+      "id": 16,
+      "class_name": "10-A",
+      "day_of_week": 3,
+      "lesson_number": 5,
+      "time_range": "11:50 - 12:35",
+      "subject": "ChQBT"
+    },
+    {
+      "id": 17,
+      "class_name": "10-A",
+      "day_of_week": 4,
+      "lesson_number": 1,
+      "time_range": "08:30 - 09:15",
+      "subject": "Adabiyot"
+    },
+    {
+      "id": 18,
+      "class_name": "10-A",
+      "day_of_week": 4,
+      "lesson_number": 2,
+      "time_range": "09:20 - 10:05",
+      "subject": "Geografiya"
+    },
+    {
+      "id": 19,
+      "class_name": "10-A",
+      "day_of_week": 4,
+      "lesson_number": 3,
+      "time_range": "10:10 - 10:55",
+      "subject": "Qoraqalpoq tili"
+    },
+    {
+      "id": 20,
+      "class_name": "10-A",
+      "day_of_week": 4,
+      "lesson_number": 4,
+      "time_range": "11:00 - 11:45",
+      "subject": "ChQBT"
+    },
+    {
+      "id": 21,
+      "class_name": "10-A",
+      "day_of_week": 4,
+      "lesson_number": 5,
+      "time_range": "11:50 - 12:35",
+      "subject": "Kimyo"
+    },
+    {
+      "id": 22,
+      "class_name": "10-A",
+      "day_of_week": 4,
+      "lesson_number": 6,
+      "time_range": "12:40 - 13:25",
+      "subject": "Fizika"
+    },
+    {
+      "id": 23,
+      "class_name": "10-A",
+      "day_of_week": 5,
+      "lesson_number": 1,
+      "time_range": "08:30 - 09:15",
+      "subject": "Jismoniy tarbiya"
+    },
+    {
+      "id": 24,
+      "class_name": "10-A",
+      "day_of_week": 5,
+      "lesson_number": 2,
+      "time_range": "09:20 - 10:05",
+      "subject": "Algebra"
+    },
+    {
+      "id": 25,
+      "class_name": "10-A",
+      "day_of_week": 5,
+      "lesson_number": 3,
+      "time_range": "10:10 - 10:55",
+      "subject": "Informatika"
+    },
+    {
+      "id": 26,
+      "class_name": "10-A",
+      "day_of_week": 5,
+      "lesson_number": 4,
+      "time_range": "11:00 - 11:45",
+      "subject": "Kimyo"
+    },
+    {
+      "id": 27,
+      "class_name": "10-A",
+      "day_of_week": 5,
+      "lesson_number": 5,
+      "time_range": "11:50 - 12:35",
+      "subject": "Geometriya"
+    },
+    {
+      "id": 28,
+      "class_name": "10-A",
+      "day_of_week": 6,
+      "lesson_number": 1,
+      "time_range": "08:30 - 09:15",
+      "subject": "Qoraqalpoq tarixi"
+    },
+    {
+      "id": 29,
+      "class_name": "10-A",
+      "day_of_week": 6,
+      "lesson_number": 2,
+      "time_range": "09:20 - 10:05",
+      "subject": "Rus tili"
+    },
+    {
+      "id": 30,
+      "class_name": "10-A",
+      "day_of_week": 6,
+      "lesson_number": 3,
+      "time_range": "10:10 - 10:55",
+      "subject": "Geometriya"
+    },
+    {
+      "id": 31,
+      "class_name": "10-A",
+      "day_of_week": 6,
+      "lesson_number": 4,
+      "time_range": "11:00 - 11:45",
+      "subject": "Ingliz tili"
+    },
+    {
+      "id": 32,
+      "class_name": "10-A",
+      "day_of_week": 6,
+      "lesson_number": 5,
+      "time_range": "11:50 - 12:35",
+      "subject": "Biologiya"
+    }
   ],
   "appeals": [],
   "audit_logs": [
+    {
+      "id": 1795759291269,
+      "event_type": "EVENT_ADD",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Yangi tadbir (video): Ustozlar bayramiga bag'ishlangan",
+      "severity": "info",
+      "created_at": 1795759291
+    },
+    {
+      "id": 1795758803187,
+      "event_type": "EVENT_DELETE",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Tadbir #1795757731063 o'chirildi.",
+      "severity": "warning",
+      "created_at": 1795758803
+    },
+    {
+      "id": 1795758794640,
+      "event_type": "EVENT_DELETE",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Tadbir #1795757731063 o'chirildi.",
+      "severity": "warning",
+      "created_at": 1795758794
+    },
+    {
+      "id": 1795758016266,
+      "event_type": "LOGIN_SUCCESS",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Muvaffaqiyatli kirish (admin).",
+      "severity": "info",
+      "created_at": 1795758016
+    },
+    {
+      "id": 1795758008930,
+      "event_type": "LOGOUT",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Foydalanuvchi tizimdan chiqdi.",
+      "severity": "info",
+      "created_at": 1795758008
+    },
+    {
+      "id": 1795757731178,
+      "event_type": "EVENT_ADD",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Yangi tadbir (video): Ustozlar bayramiga bag'ishlangan",
+      "severity": "info",
+      "created_at": 1795757731
+    },
+    {
+      "id": 1795757598348,
+      "event_type": "LOGIN_SUCCESS",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Muvaffaqiyatli kirish (admin).",
+      "severity": "info",
+      "created_at": 1795757598
+    },
+    {
+      "id": 1795757586612,
+      "event_type": "LOGOUT",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Foydalanuvchi tizimdan chiqdi.",
+      "severity": "info",
+      "created_at": 1795757586
+    },
+    {
+      "id": 1795757067330,
+      "event_type": "SCHOOL_INFO_UPDATE",
+      "username": "admin49",
+      "ip_address": "https-client",
+      "details": "Maktab ko'rsatkichlari yangilandi.",
+      "severity": "info",
+      "created_at": 1795757067
+    },
     {
       "id": 1,
       "event_type": "SYSTEM_INIT",
